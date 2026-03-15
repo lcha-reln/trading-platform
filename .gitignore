@@ -1,0 +1,32 @@
+# Maven
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# SBE generated sources (can be regenerated)
+# common/common-sbe/target/
+
+# Excluded - incomplete files
+common/common-util/src/main/java/com/trading/util/SnowflakeIdGenerator.java
