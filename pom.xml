@@ -106,7 +106,7 @@
             <!-- CPU 亲和性绑定 -->
             <dependency>
                 <groupId>net.openhft</groupId>
-                <artifactId>Java-Thread-Affinity</artifactId>
+                <artifactId>affinity</artifactId>
                 <version>${affinity.version}</version>
             </dependency>
 
@@ -151,6 +151,17 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <repositories>
+        <repository>
+            <id>aliyun</id>
+            <url>https://maven.aliyun.com/repository/public</url>
+        </repository>
+        <repository>
+            <id>central</id>
+            <url>https://repo1.maven.org/maven2</url>
+        </repository>
+    </repositories>
 
     <build>
         <pluginManagement>

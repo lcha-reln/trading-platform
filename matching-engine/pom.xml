@@ -41,7 +41,7 @@
         </dependency>
         <dependency>
             <groupId>net.openhft</groupId>
-            <artifactId>Java-Thread-Affinity</artifactId>
+            <artifactId>affinity</artifactId>
         </dependency>
         <dependency>
             <groupId>org.hdrhistogram</groupId>
@@ -61,4 +61,32 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.6.3</version>
+                <executions>
+                    <execution>
+                        <id>run</id>
+                        <goals><goal>exec</goal></goals>
+                        <configuration>
+                            <executable>java</executable>
+                            <arguments>
+                                <argument>--add-opens=java.base/sun.nio.ch=ALL-UNNAMED</argument>
+                                <argument>--add-opens=java.base/java.lang=ALL-UNNAMED</argument>
+                                <argument>-Xms512m</argument>
+                                <argument>-Xmx512m</argument>
+                                <argument>-cp</argument>
+                                <classpath/>
+                                <argument>${exec.mainClass}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

@@ -17,6 +17,12 @@ target/
 *.njsproj
 *.sln
 
+# Eclipse
+.classpath
+.factorypath
+.project
+.settings/
+
 # OS
 .DS_Store
 Thumbs.db
