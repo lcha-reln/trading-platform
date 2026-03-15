@@ -27,6 +27,3 @@ logs/
 
 # SBE generated sources (can be regenerated)
 # common/common-sbe/target/
-
-# Excluded - incomplete files
-common/common-util/src/main/java/com/trading/util/SnowflakeIdGenerator.java
