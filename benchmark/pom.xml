@@ -56,6 +56,21 @@
 
     <build>
         <plugins>
+            <!-- 显式配置注解处理器路径，确保 JMH 生成 BenchmarkList 和辅助类 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.openjdk.jmh</groupId>
+                            <artifactId>jmh-generator-annprocess</artifactId>
+                            <version>${jmh.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+
             <!-- 打包为可执行 fat-jar，方便独立运行基准测试 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
