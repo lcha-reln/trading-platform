@@ -85,18 +85,18 @@ public final class MatchEvent {
 
     /** 重置字段（归还列表时调用）*/
     public void reset() {
-        sequenceNo       = 0L;
-        symbolId         = 0;
-        makerOrderId     = 0L;
-        takerOrderId     = 0L;
-        makerAccountId   = 0L;
-        takerAccountId   = 0L;
-        price            = 0L;
-        quantity         = 0L;
-        makerSide        = 0;
-        makerFee         = 0L;
-        takerFee         = 0L;
-        timestampNs      = 0L;
+        sequenceNo = 0L;
+        symbolId = 0;
+        makerOrderId = 0L;
+        takerOrderId = 0L;
+        makerAccountId = 0L;
+        takerAccountId = 0L;
+        price = 0L;
+        quantity = 0L;
+        makerSide = 0;
+        makerFee = 0L;
+        takerFee = 0L;
+        timestampNs = 0L;
         makerFullyFilled = false;
         takerFullyFilled = false;
     }
@@ -226,7 +226,7 @@ public final class MatchResult {
     public void reset(final OrderNode taker) {
         events.clear();
         takerStatus = null;
-        takerNode   = taker;
+        takerNode = taker;
     }
 }
 ```

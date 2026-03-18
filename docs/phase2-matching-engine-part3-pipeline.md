@@ -220,7 +220,7 @@ public final class MatchingHandler implements EventHandler<MatchingEvent> {
 
     private static final Logger log = LoggerFactory.getLogger(MatchingHandler.class);
 
-    private static final byte EVENT_NEW_ORDER    = 1;
+    private static final byte EVENT_NEW_ORDER = 1;
     private static final byte EVENT_CANCEL_ORDER = 2;
 
     private final OrderMatcher matcher;
@@ -254,7 +254,7 @@ public final class MatchingHandler implements EventHandler<MatchingEvent> {
 
     private void handleCancelOrder(final MatchingEvent event) {
         final OrderNode cancelled = matcher.cancel(event.cancelOrderId);
-        event.cancelFound   = (cancelled != null);
+        event.cancelFound = (cancelled != null);
         event.cancelledNode = cancelled;
     }
 }
