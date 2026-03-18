@@ -25,13 +25,13 @@
 
 **确定性要求（关键）：**
 
-| 禁止 | 原因 | 替代方案 |
-|------|------|---------|
-| `System.currentTimeMillis()` | 各节点系统时钟不一致 | `cluster.time()` |
-| `System.nanoTime()` 用于业务逻辑 | 同上 | `cluster.time()` |
-| 多线程修改状态 | 破坏确定性 | 所有状态变更在 `onSessionMessage` 单线程 |
-| 外部 IO（DB 读写） | 阻塞 + 非确定性 | 通过 Aeron IPC 异步分发 |
-| `Random` 类 | 各节点随机序列不同 | 确定性伪随机（固定 seed）|
+| 禁止                           | 原因         | 替代方案                           |
+|------------------------------|------------|--------------------------------|
+| `System.currentTimeMillis()` | 各节点系统时钟不一致 | `cluster.time()`               |
+| `System.nanoTime()` 用于业务逻辑   | 同上         | `cluster.time()`               |
+| 多线程修改状态                      | 破坏确定性      | 所有状态变更在 `onSessionMessage` 单线程 |
+| 外部 IO（DB 读写）                 | 阻塞 + 非确定性  | 通过 Aeron IPC 异步分发              |
+| `Random` 类                   | 各节点随机序列不同  | 确定性伪随机（固定 seed）                |
 
 文件：`counter-service/src/main/java/com/trading/counter/cluster/CounterClusteredService.java`
 
@@ -831,14 +831,14 @@ mvn test -pl counter-service -Dcheckstyle.skip=true
 
 ### 5.2 测试总计
 
-| Part | 测试文件 | 测试数 |
-|------|---------|--------|
-| Part 1 | `DomainModelTest` | 38 |
-| Part 2 | `AccountManagerTest` + `PositionManagerTest` | 21 |
-| Part 3 | `RiskCheckerTest` | 34 |
-| Part 4 | `CounterPipelineTest` | 5 |
-| Part 5 | `CounterClusteredServiceTest` | 9 |
-| **合计** | | **107 个测试，0 Failures，0 Errors** |
+| Part   | 测试文件                                         | 测试数                             |
+|--------|----------------------------------------------|---------------------------------|
+| Part 1 | `DomainModelTest`                            | 38                              |
+| Part 2 | `AccountManagerTest` + `PositionManagerTest` | 21                              |
+| Part 3 | `RiskCheckerTest`                            | 34                              |
+| Part 4 | `CounterPipelineTest`                        | 5                               |
+| Part 5 | `CounterClusteredServiceTest`                | 9                               |
+| **合计** |                                              | **107 个测试，0 Failures，0 Errors** |
 
 ```bash
 # 一键运行 counter-service 全部测试
@@ -873,20 +873,20 @@ Phase 3 全部验收通过后，进入 **Phase 4：Gateway 与 Push Service**，
 ### Phase 4 主要任务
 
 1. **Gateway Service（Netty HTTP + WebSocket）**
-   - `HttpServerHandler`：REST 下单/查询接口
-   - `WebSocketHandler`：行情订阅/回报推送接口
-   - `JwtAuthenticator` / `HmacAuthenticator`：鉴权
-   - `TokenBucketRateLimiter`：令牌桶限流（per-account）
-   - `AeronClusterClient`：连接 Aeron Cluster Ingress
+    - `HttpServerHandler`：REST 下单/查询接口
+    - `WebSocketHandler`：行情订阅/回报推送接口
+    - `JwtAuthenticator` / `HmacAuthenticator`：鉴权
+    - `TokenBucketRateLimiter`：令牌桶限流（per-account）
+    - `AeronClusterClient`：连接 Aeron Cluster Ingress
 
 2. **Push Service**
-   - `MarketDataSubscriber`：订阅 Aeron IPC stream=4（撮合引擎行情）
-   - `DepthDispatcher`：差量深度聚合
-   - `TradeDispatcher`：逐笔成交推送
-   - `TickerAggregator`：最新价/24h 统计
-   - `WebSocketPushHandler`：Netty WebSocket 广播
+    - `MarketDataSubscriber`：订阅 Aeron IPC stream=4（撮合引擎行情）
+    - `DepthDispatcher`：差量深度聚合
+    - `TradeDispatcher`：逐笔成交推送
+    - `TickerAggregator`：最新价/24h 统计
+    - `WebSocketPushHandler`：Netty WebSocket 广播
 
 3. **Journal Service**
-   - `JournalEventSubscriber`：订阅 Aeron IPC stream=5
-   - `MappedFileJournalWriter`：顺序写事件日志
-   - `JournalRotationManager`：文件轮转（按日期/大小）
+    - `JournalEventSubscriber`：订阅 Aeron IPC stream=5
+    - `MappedFileJournalWriter`：顺序写事件日志
+    - `JournalRotationManager`：文件轮转（按日期/大小）

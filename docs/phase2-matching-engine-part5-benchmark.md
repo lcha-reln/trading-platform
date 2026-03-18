@@ -25,11 +25,11 @@
 
 ### 1.1 测试工具选型
 
-| 工具 | 用途 | 说明 |
-|------|------|------|
-| **JMH** | 微基准（吞吐量、平均延迟） | 精确测量单操作耗时，隔离 JIT 干扰 |
-| **HdrHistogram** | 延迟分布（P50/P99/P99.9） | 高精度延迟直方图，热路径测量 |
-| **jHiccup** | GC / OS 停顿检测 | 测量 JVM 非正常停顿，验证零 GC |
+| 工具               | 用途                  | 说明                  |
+|------------------|---------------------|---------------------|
+| **JMH**          | 微基准（吞吐量、平均延迟）       | 精确测量单操作耗时，隔离 JIT 干扰 |
+| **HdrHistogram** | 延迟分布（P50/P99/P99.9） | 高精度延迟直方图，热路径测量      |
+| **jHiccup**      | GC / OS 停顿检测        | 测量 JVM 非正常停顿，验证零 GC |
 
 ### 1.2 测试场景
 
@@ -90,40 +90,40 @@ import java.util.concurrent.TimeUnit;
 @Warmup(iterations = 5, time = 1)
 @Measurement(iterations = 5, time = 2)
 @Fork(value = 1, jvmArgsAppend = {
-    "-Xms4g", "-Xmx4g",
-    "-XX:+UseZGC",
-    "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED"
+        "-Xms4g", "-Xmx4g",
+        "-XX:+UseZGC",
+        "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED"
 })
 public class OrderBookBenchmark {
 
-    private static final int SYMBOL_ID  = 1;
-    private static final int POOL_SIZE  = 200_000;
+    private static final int SYMBOL_ID = 1;
+    private static final int POOL_SIZE = 200_000;
 
     private OrderNodePool pool;
-    private OrderBook     book;
+    private OrderBook book;
 
     // 预填充的节点（用于 removeOrder 基准）
-    private OrderNode[]   preFilledNodes;
-    private int           removeIndex = 0;
+    private OrderNode[] preFilledNodes;
+    private int removeIndex = 0;
 
     // addOrder 用的节点（循环复用，模拟零 GC）
-    private OrderNode     reusableNode;
-    private long          orderIdCounter = 0L;
+    private OrderNode reusableNode;
+    private long orderIdCounter = 0L;
 
     @Setup(Level.Trial)
     public void setup() {
-        pool          = new OrderNodePool(POOL_SIZE);
-        book          = new OrderBook(SYMBOL_ID, pool);
-        reusableNode  = new OrderNode();
+        pool = new OrderNodePool(POOL_SIZE);
+        book = new OrderBook(SYMBOL_ID, pool);
+        reusableNode = new OrderNode();
 
         // 预填充 10 万个卖单，用于 removeOrder 基准
         preFilledNodes = new OrderNode[100_000];
         for (int i = 0; i < preFilledNodes.length; i++) {
             final OrderNode n = pool.borrow();
             n.init(i + 1L, 1001L, SYMBOL_ID, Side.SELL.value(),
-                   OrderType.LIMIT.value(), TimeInForce.GTC.value(),
-                   5000_00L + i * 100L,  // 不同价格，避免同价位链表影响
-                   100L, 0L, System.nanoTime());
+                    OrderType.LIMIT.value(), TimeInForce.GTC.value(),
+                    5000_00L + i * 100L,  // 不同价格，避免同价位链表影响
+                    100L, 0L, System.nanoTime());
             book.addOrder(n);
             preFilledNodes[i] = n;
         }
@@ -134,10 +134,10 @@ public class OrderBookBenchmark {
     @Benchmark
     public void addBuyOrder() {
         reusableNode.init(++orderIdCounter, 1002L, SYMBOL_ID,
-                          Side.BUY.value(),
-                          OrderType.LIMIT.value(), TimeInForce.GTC.value(),
-                          4000_00L + (orderIdCounter % 1000) * 100L,  // 买价远低于卖价，不触发撮合
-                          100L, 0L, 0L);
+                Side.BUY.value(),
+                OrderType.LIMIT.value(), TimeInForce.GTC.value(),
+                4000_00L + (orderIdCounter % 1000) * 100L,  // 买价远低于卖价，不触发撮合
+                100L, 0L, 0L);
         book.addOrder(reusableNode);
         // 立即撤出，防止订单簿无限增长（模拟零 GC 复用）
         book.removeOrder(reusableNode.orderId);
@@ -146,10 +146,10 @@ public class OrderBookBenchmark {
     @Benchmark
     public void addSellOrder() {
         reusableNode.init(++orderIdCounter, 1001L, SYMBOL_ID,
-                          Side.SELL.value(),
-                          OrderType.LIMIT.value(), TimeInForce.GTC.value(),
-                          9000_00L + (orderIdCounter % 1000) * 100L,  // 卖价远高于买价
-                          100L, 0L, 0L);
+                Side.SELL.value(),
+                OrderType.LIMIT.value(), TimeInForce.GTC.value(),
+                9000_00L + (orderIdCounter % 1000) * 100L,  // 卖价远高于买价
+                100L, 0L, 0L);
         book.addOrder(reusableNode);
         book.removeOrder(reusableNode.orderId);
     }
@@ -166,9 +166,9 @@ public class OrderBookBenchmark {
                     final OrderNode n = pool.borrow();
                     if (n != null) {
                         n.init(preFilledNodes[i].orderId, 1001L, SYMBOL_ID,
-                               Side.SELL.value(), OrderType.LIMIT.value(),
-                               TimeInForce.GTC.value(),
-                               5000_00L + i * 100L, 100L, 0L, 0L);
+                                Side.SELL.value(), OrderType.LIMIT.value(),
+                                TimeInForce.GTC.value(),
+                                5000_00L + i * 100L, 100L, 0L, 0L);
                         book.addOrder(n);
                         preFilledNodes[i] = n;
                     }
@@ -184,8 +184,8 @@ public class OrderBookBenchmark {
 
     public static void main(final String[] args) throws Exception {
         new Runner(new OptionsBuilder()
-            .include(OrderBookBenchmark.class.getSimpleName())
-            .build()).run();
+                .include(OrderBookBenchmark.class.getSimpleName())
+                .build()).run();
     }
 }
 ```
@@ -665,28 +665,28 @@ Phase 2 全部验收通过后，进入 **Phase 3：柜台服务实现**，包括
 ### Phase 3 主要任务
 
 1. **账户余额管理（Spot）**
-   - `AccountManager`：余额冻结/解冻/扣减
-   - 买单挂单冻结 quote 资产，卖单冻结 base 资产
-   - 成交后资金划转
+    - `AccountManager`：余额冻结/解冻/扣减
+    - 买单挂单冻结 quote 资产，卖单冻结 base 资产
+    - 成交后资金划转
 
 2. **保证金管理（Perp/Futures）**
-   - `MarginManager`：初始保证金、维持保证金
-   - 未实现盈亏实时计算
-   - 强平价格计算
+    - `MarginManager`：初始保证金、维持保证金
+    - 未实现盈亏实时计算
+    - 强平价格计算
 
 3. **仓位管理**
-   - `PositionManager`：开仓/平仓/仓位合并
-   - 多空仓位独立维护
+    - `PositionManager`：开仓/平仓/仓位合并
+    - 多空仓位独立维护
 
 4. **风控模块**
-   - `BalanceRiskChecker`：余额充足性校验
-   - `PriceBandChecker`：价格笼子（防异常价格冲击）
+    - `BalanceRiskChecker`：余额充足性校验
+    - `PriceBandChecker`：价格笼子（防异常价格冲击）
 
 5. **柜台 Disruptor Pipeline**
-   - `AuthHandler` → `SymbolHandler` → `RiskHandler` → `FreezeHandler` → `RouteHandler`
+    - `AuthHandler` → `SymbolHandler` → `RiskHandler` → `FreezeHandler` → `RouteHandler`
 
 6. **Counter → MatchEngine → Counter 完整回路**
-   - `ExecutionReportProcessor`：订阅撮合回报，更新仓位/余额，回报客户端
+    - `ExecutionReportProcessor`：订阅撮合回报，更新仓位/余额，回报客户端
 
 7. **ClusteredService 集成**
-   - 实现 `ClusteredService` 接口，接入 Aeron Cluster Raft 共识
+    - 实现 `ClusteredService` 接口，接入 Aeron Cluster Raft 共识

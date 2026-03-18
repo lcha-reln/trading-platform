@@ -1,17 +1,32 @@
 package com.trading.benchmark;
 
-import com.trading.sbe.*;
+import com.trading.sbe.MessageHeaderDecoder;
+import com.trading.sbe.MessageHeaderEncoder;
+import com.trading.sbe.NewOrderRequestDecoder;
+import com.trading.sbe.NewOrderRequestEncoder;
+import com.trading.sbe.OrderType;
+import com.trading.sbe.Side;
+import com.trading.sbe.TimeInForce;
 import org.agrona.concurrent.UnsafeBuffer;
-import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Measurement;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.Warmup;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
 /**
  * SBE 编解码性能基准测试。
- *
+ * <p>
  * 验证目标：SBE 编解码单条消息 < 50ns。
- *
+ * <p>
  * 打包：mvn package -pl benchmark -am -DskipTests -q
  * 运行：java -jar benchmark/target/benchmarks.jar SbeCodecBenchmark
  */
@@ -32,11 +47,11 @@ public class SbeCodecBenchmark {
     @Setup
     public void setup() {
         // 预分配，只做一次
-        buffer       = new UnsafeBuffer(ByteBuffer.allocateDirect(512));
+        buffer = new UnsafeBuffer(ByteBuffer.allocateDirect(512));
         headerEncoder = new MessageHeaderEncoder();
-        orderEncoder  = new NewOrderRequestEncoder();
+        orderEncoder = new NewOrderRequestEncoder();
         headerDecoder = new MessageHeaderDecoder();
-        orderDecoder  = new NewOrderRequestDecoder();
+        orderDecoder = new NewOrderRequestDecoder();
 
         // 预填充一条消息（用于解码基准）
         encode();

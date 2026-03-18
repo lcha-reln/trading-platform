@@ -606,12 +606,14 @@ mkdir -p benchmark/src/main/java/com/trading/benchmark
                 <executions>
                     <execution>
                         <phase>package</phase>
-                        <goals><goal>shade</goal></goals>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
                         <configuration>
                             <finalName>benchmarks</finalName>
                             <transformers>
                                 <transformer implementation=
-                                    "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                                     "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>org.openjdk.jmh.Main</mainClass>
                                 </transformer>
                             </transformers>
@@ -666,22 +668,22 @@ SBE（Simple Binary Encoding）是一种**固定长度二进制编解码**规范
 
         <!-- 消息头：每条消息都以此开头，SBE 标准格式 -->
         <composite name="messageHeader" description="SBE Message Header">
-            <type name="blockLength"  primitiveType="uint16"/>
-            <type name="templateId"   primitiveType="uint16"/>
-            <type name="schemaId"     primitiveType="uint16"/>
-            <type name="version"      primitiveType="uint16"/>
+            <type name="blockLength" primitiveType="uint16"/>
+            <type name="templateId" primitiveType="uint16"/>
+            <type name="schemaId" primitiveType="uint16"/>
+            <type name="version" primitiveType="uint16"/>
         </composite>
 
         <!-- 分组头（用于变长数组，Phase 1 暂不使用） -->
         <composite name="groupSizeEncoding">
             <type name="blockLength" primitiveType="uint16"/>
-            <type name="numInGroup"  primitiveType="uint16"/>
+            <type name="numInGroup" primitiveType="uint16"/>
         </composite>
 
         <!-- 变长字符串头 -->
         <composite name="varStringEncoding">
-            <type name="length"      primitiveType="uint32"/>
-            <type name="varData"     primitiveType="uint8" length="0" characterEncoding="UTF-8"/>
+            <type name="length" primitiveType="uint32"/>
+            <type name="varData" primitiveType="uint8" length="0" characterEncoding="UTF-8"/>
         </composite>
 
         <!-- ---- 枚举类型 ---- -->
@@ -765,100 +767,100 @@ SBE（Simple Binary Encoding）是一种**固定长度二进制编解码**规范
 
     <!-- 新建订单请求 -->
     <message name="NewOrderRequest" id="1" description="Place a new order">
-        <field name="correlationId"  id="1"  type="int64"       description="客户端唯一请求ID，用于匹配回报"/>
-        <field name="accountId"      id="2"  type="int64"       description="账户ID"/>
-        <field name="symbolId"       id="3"  type="int32"       description="交易对ID"/>
-        <field name="side"           id="4"  type="Side"        description="买卖方向"/>
-        <field name="orderType"      id="5"  type="OrderType"   description="订单类型"/>
-        <field name="timeInForce"    id="6"  type="TimeInForce" description="有效时间"/>
-        <field name="price"          id="7"  type="int64"       description="委托价格（固定精度整数，Market单填0）"/>
-        <field name="quantity"       id="8"  type="int64"       description="委托数量（固定精度整数）"/>
-        <field name="leverage"       id="9"  type="int16"       description="杠杆倍数（Spot填1）"/>
-        <field name="timestamp"      id="10" type="int64"       description="客户端时间戳（纳秒 UTC epoch）"/>
+        <field name="correlationId" id="1" type="int64" description="客户端唯一请求ID，用于匹配回报"/>
+        <field name="accountId" id="2" type="int64" description="账户ID"/>
+        <field name="symbolId" id="3" type="int32" description="交易对ID"/>
+        <field name="side" id="4" type="Side" description="买卖方向"/>
+        <field name="orderType" id="5" type="OrderType" description="订单类型"/>
+        <field name="timeInForce" id="6" type="TimeInForce" description="有效时间"/>
+        <field name="price" id="7" type="int64" description="委托价格（固定精度整数，Market单填0）"/>
+        <field name="quantity" id="8" type="int64" description="委托数量（固定精度整数）"/>
+        <field name="leverage" id="9" type="int16" description="杠杆倍数（Spot填1）"/>
+        <field name="timestamp" id="10" type="int64" description="客户端时间戳（纳秒 UTC epoch）"/>
     </message>
 
     <!-- 撤销订单请求 -->
     <message name="CancelOrderRequest" id="2" description="Cancel an existing order">
-        <field name="correlationId"  id="1"  type="int64"  description="客户端唯一请求ID"/>
-        <field name="accountId"      id="2"  type="int64"  description="账户ID"/>
-        <field name="orderId"        id="3"  type="int64"  description="要撤销的订单ID"/>
-        <field name="symbolId"       id="4"  type="int32"  description="交易对ID"/>
-        <field name="timestamp"      id="5"  type="int64"  description="客户端时间戳（纳秒）"/>
+        <field name="correlationId" id="1" type="int64" description="客户端唯一请求ID"/>
+        <field name="accountId" id="2" type="int64" description="账户ID"/>
+        <field name="orderId" id="3" type="int64" description="要撤销的订单ID"/>
+        <field name="symbolId" id="4" type="int32" description="交易对ID"/>
+        <field name="timestamp" id="5" type="int64" description="客户端时间戳（纳秒）"/>
     </message>
 
     <!-- ==================== 出站回报消息 ==================== -->
 
     <!-- 订单执行回报（订单状态变更的核心消息） -->
     <message name="ExecutionReport" id="101" description="Order execution report">
-        <field name="orderId"        id="1"  type="int64"       description="系统订单ID（全局唯一）"/>
-        <field name="correlationId"  id="2"  type="int64"       description="对应请求的 correlationId"/>
-        <field name="accountId"      id="3"  type="int64"       description="账户ID"/>
-        <field name="symbolId"       id="4"  type="int32"       description="交易对ID"/>
-        <field name="execType"       id="5"  type="ExecType"    description="本次执行事件类型"/>
-        <field name="orderStatus"    id="6"  type="OrderStatus" description="订单当前状态"/>
-        <field name="side"           id="7"  type="Side"        description="买卖方向"/>
-        <field name="price"          id="8"  type="int64"       description="委托价格"/>
-        <field name="quantity"       id="9"  type="int64"       description="委托数量"/>
-        <field name="filledQty"      id="10" type="int64"       description="累计成交数量"/>
-        <field name="leavesQty"      id="11" type="int64"       description="剩余未成交数量"/>
-        <field name="lastFillPrice"  id="12" type="int64"       description="本次成交价格（无成交填0）"/>
-        <field name="lastFillQty"    id="13" type="int64"       description="本次成交数量（无成交填0）"/>
-        <field name="fee"            id="14" type="int64"       description="本次手续费（固定精度）"/>
-        <field name="rejectReason"   id="15" type="RejectReason" description="拒绝原因（非拒绝填NONE）"/>
-        <field name="timestamp"      id="16" type="int64"       description="系统时间戳（纳秒）"/>
+        <field name="orderId" id="1" type="int64" description="系统订单ID（全局唯一）"/>
+        <field name="correlationId" id="2" type="int64" description="对应请求的 correlationId"/>
+        <field name="accountId" id="3" type="int64" description="账户ID"/>
+        <field name="symbolId" id="4" type="int32" description="交易对ID"/>
+        <field name="execType" id="5" type="ExecType" description="本次执行事件类型"/>
+        <field name="orderStatus" id="6" type="OrderStatus" description="订单当前状态"/>
+        <field name="side" id="7" type="Side" description="买卖方向"/>
+        <field name="price" id="8" type="int64" description="委托价格"/>
+        <field name="quantity" id="9" type="int64" description="委托数量"/>
+        <field name="filledQty" id="10" type="int64" description="累计成交数量"/>
+        <field name="leavesQty" id="11" type="int64" description="剩余未成交数量"/>
+        <field name="lastFillPrice" id="12" type="int64" description="本次成交价格（无成交填0）"/>
+        <field name="lastFillQty" id="13" type="int64" description="本次成交数量（无成交填0）"/>
+        <field name="fee" id="14" type="int64" description="本次手续费（固定精度）"/>
+        <field name="rejectReason" id="15" type="RejectReason" description="拒绝原因（非拒绝填NONE）"/>
+        <field name="timestamp" id="16" type="int64" description="系统时间戳（纳秒）"/>
     </message>
 
     <!-- ==================== 内部消息（Counter → MatchEngine） ==================== -->
 
     <!-- 经风控通过后的内部订单 -->
     <message name="InternalNewOrder" id="201" description="Risk-checked order to matching engine">
-        <field name="orderId"        id="1"  type="int64"       description="柜台分配的系统订单ID"/>
-        <field name="correlationId"  id="2"  type="int64"       description="原始请求 correlationId"/>
-        <field name="accountId"      id="3"  type="int64"       description="账户ID"/>
-        <field name="symbolId"       id="4"  type="int32"       description="交易对ID"/>
-        <field name="side"           id="5"  type="Side"        description="买卖方向"/>
-        <field name="orderType"      id="6"  type="OrderType"   description="订单类型"/>
-        <field name="timeInForce"    id="7"  type="TimeInForce" description="有效时间"/>
-        <field name="price"          id="8"  type="int64"       description="委托价格"/>
-        <field name="quantity"       id="9"  type="int64"       description="委托数量"/>
-        <field name="timestamp"      id="10" type="int64"       description="系统接受时间戳（纳秒）"/>
+        <field name="orderId" id="1" type="int64" description="柜台分配的系统订单ID"/>
+        <field name="correlationId" id="2" type="int64" description="原始请求 correlationId"/>
+        <field name="accountId" id="3" type="int64" description="账户ID"/>
+        <field name="symbolId" id="4" type="int32" description="交易对ID"/>
+        <field name="side" id="5" type="Side" description="买卖方向"/>
+        <field name="orderType" id="6" type="OrderType" description="订单类型"/>
+        <field name="timeInForce" id="7" type="TimeInForce" description="有效时间"/>
+        <field name="price" id="8" type="int64" description="委托价格"/>
+        <field name="quantity" id="9" type="int64" description="委托数量"/>
+        <field name="timestamp" id="10" type="int64" description="系统接受时间戳（纳秒）"/>
     </message>
 
     <!-- 内部撤单指令 -->
     <message name="InternalCancelOrder" id="202" description="Cancel order to matching engine">
-        <field name="orderId"        id="1"  type="int64"  description="要撤销的订单ID"/>
-        <field name="accountId"      id="2"  type="int64"  description="账户ID"/>
-        <field name="symbolId"       id="3"  type="int32"  description="交易对ID"/>
-        <field name="correlationId"  id="4"  type="int64"  description="原始请求 correlationId"/>
-        <field name="timestamp"      id="5"  type="int64"  description="时间戳（纳秒）"/>
+        <field name="orderId" id="1" type="int64" description="要撤销的订单ID"/>
+        <field name="accountId" id="2" type="int64" description="账户ID"/>
+        <field name="symbolId" id="3" type="int32" description="交易对ID"/>
+        <field name="correlationId" id="4" type="int64" description="原始请求 correlationId"/>
+        <field name="timestamp" id="5" type="int64" description="时间戳（纳秒）"/>
     </message>
 
     <!-- ==================== 撮合回报消息 ==================== -->
 
     <!-- 撮合成交结果 -->
     <message name="MatchResult" id="301" description="Match execution result from matching engine">
-        <field name="sequenceNo"      id="1"  type="int64"  description="撮合全局序列号（单调递增）"/>
-        <field name="symbolId"        id="2"  type="int32"  description="交易对ID"/>
-        <field name="makerOrderId"    id="3"  type="int64"  description="Maker 订单ID（被动方）"/>
-        <field name="takerOrderId"    id="4"  type="int64"  description="Taker 订单ID（主动方）"/>
-        <field name="makerAccountId"  id="5"  type="int64"  description="Maker 账户ID"/>
-        <field name="takerAccountId"  id="6"  type="int64"  description="Taker 账户ID"/>
-        <field name="price"           id="7"  type="int64"  description="成交价格（Maker 价格优先）"/>
-        <field name="quantity"        id="8"  type="int64"  description="成交数量"/>
-        <field name="makerSide"       id="9"  type="Side"   description="Maker 的买卖方向"/>
-        <field name="makerFee"        id="10" type="int64"  description="Maker 手续费（可为负，表示返佣）"/>
-        <field name="takerFee"        id="11" type="int64"  description="Taker 手续费"/>
-        <field name="timestamp"       id="12" type="int64"  description="成交时间戳（纳秒）"/>
+        <field name="sequenceNo" id="1" type="int64" description="撮合全局序列号（单调递增）"/>
+        <field name="symbolId" id="2" type="int32" description="交易对ID"/>
+        <field name="makerOrderId" id="3" type="int64" description="Maker 订单ID（被动方）"/>
+        <field name="takerOrderId" id="4" type="int64" description="Taker 订单ID（主动方）"/>
+        <field name="makerAccountId" id="5" type="int64" description="Maker 账户ID"/>
+        <field name="takerAccountId" id="6" type="int64" description="Taker 账户ID"/>
+        <field name="price" id="7" type="int64" description="成交价格（Maker 价格优先）"/>
+        <field name="quantity" id="8" type="int64" description="成交数量"/>
+        <field name="makerSide" id="9" type="Side" description="Maker 的买卖方向"/>
+        <field name="makerFee" id="10" type="int64" description="Maker 手续费（可为负，表示返佣）"/>
+        <field name="takerFee" id="11" type="int64" description="Taker 手续费"/>
+        <field name="timestamp" id="12" type="int64" description="成交时间戳（纳秒）"/>
     </message>
 
     <!-- 订单簿变更事件（用于行情推送） -->
     <message name="OrderBookUpdate" id="302" description="Order book change event for market data">
-        <field name="sequenceNo"  id="1"  type="int64"  description="撮合序列号"/>
-        <field name="symbolId"    id="2"  type="int32"  description="交易对ID"/>
-        <field name="side"        id="3"  type="Side"   description="变化的方向（买盘/卖盘）"/>
-        <field name="price"       id="4"  type="int64"  description="变化的价格档位"/>
-        <field name="quantity"    id="5"  type="int64"  description="该档位新的总挂单量（0表示该档已清空）"/>
-        <field name="timestamp"   id="6"  type="int64"  description="时间戳（纳秒）"/>
+        <field name="sequenceNo" id="1" type="int64" description="撮合序列号"/>
+        <field name="symbolId" id="2" type="int32" description="交易对ID"/>
+        <field name="side" id="3" type="Side" description="变化的方向（买盘/卖盘）"/>
+        <field name="price" id="4" type="int64" description="变化的价格档位"/>
+        <field name="quantity" id="5" type="int64" description="该档位新的总挂单量（0表示该档已清空）"/>
+        <field name="timestamp" id="6" type="int64" description="时间戳（纳秒）"/>
     </message>
 
 </messageSchema>
@@ -902,33 +904,71 @@ NewOrderRequestEncoder orderEncoder = new NewOrderRequestEncoder();
 
 // 2. 编码（零拷贝，直接写入 buffer）
 int offset = 0;
-headerEncoder.wrap(buffer, offset)
-    .blockLength(NewOrderRequestEncoder.BLOCK_LENGTH)
-    .templateId(NewOrderRequestEncoder.TEMPLATE_ID)
-    .schemaId(NewOrderRequestEncoder.SCHEMA_ID)
-    .version(NewOrderRequestEncoder.SCHEMA_VERSION);
+headerEncoder.
 
-orderEncoder.wrap(buffer, offset + MessageHeaderEncoder.ENCODED_LENGTH)
-    .correlationId(12345L)
-    .accountId(1001L)
-    .symbolId(1)
-    .side(Side.BUY)
-    .orderType(OrderType.LIMIT)
-    .timeInForce(TimeInForce.GTC)
-    .price(5000000L)     // 50000.00 USDT（精度 0.01）
-    .quantity(100000L)   // 1.00000 BTC（精度 0.00001）
-    .leverage((short) 1)
-    .timestamp(System.nanoTime());
+wrap(buffer, offset)
+    .
+
+blockLength(NewOrderRequestEncoder.BLOCK_LENGTH)
+    .
+
+templateId(NewOrderRequestEncoder.TEMPLATE_ID)
+    .
+
+schemaId(NewOrderRequestEncoder.SCHEMA_ID)
+    .
+
+version(NewOrderRequestEncoder.SCHEMA_VERSION);
+
+orderEncoder.
+
+wrap(buffer, offset +MessageHeaderEncoder.ENCODED_LENGTH)
+    .
+
+correlationId(12345L)
+    .
+
+accountId(1001L)
+    .
+
+symbolId(1)
+    .
+
+side(Side.BUY)
+    .
+
+orderType(OrderType.LIMIT)
+    .
+
+timeInForce(TimeInForce.GTC)
+    .
+
+price(5000000L)     // 50000.00 USDT（精度 0.01）
+    .
+
+quantity(100000L)   // 1.00000 BTC（精度 0.00001）
+    .
+
+leverage((short) 1)
+        .
+
+timestamp(System.nanoTime());
 
 // 3. 解码（同样零拷贝）
 MessageHeaderDecoder headerDecoder = new MessageHeaderDecoder();
 NewOrderRequestDecoder orderDecoder = new NewOrderRequestDecoder();
 
-headerDecoder.wrap(buffer, 0);
-orderDecoder.wrap(buffer,
-    MessageHeaderDecoder.ENCODED_LENGTH,
-    headerDecoder.blockLength(),
-    headerDecoder.version());
+headerDecoder.
+
+wrap(buffer, 0);
+orderDecoder.
+
+wrap(buffer,
+     MessageHeaderDecoder.ENCODED_LENGTH,
+     headerDecoder.blockLength(),
+    headerDecoder.
+
+version());
 
 long accountId = orderDecoder.accountId();  // 直接从 buffer 读取，无对象创建
 Side side = orderDecoder.side();
@@ -962,16 +1002,16 @@ package com.trading.util;
 public final class SnowflakeIdGenerator {
 
     // 各字段位数
-    private static final int NODE_ID_BITS    = 5;
-    private static final int SEQUENCE_BITS   = 16;
+    private static final int NODE_ID_BITS = 5;
+    private static final int SEQUENCE_BITS = 16;
 
     // 最大值掩码
-    private static final long MAX_NODE_ID    = (1L << NODE_ID_BITS) - 1;   // 31
-    private static final long MAX_SEQUENCE   = (1L << SEQUENCE_BITS) - 1;  // 65535
+    private static final long MAX_NODE_ID = (1L << NODE_ID_BITS) - 1;   // 31
+    private static final long MAX_SEQUENCE = (1L << SEQUENCE_BITS) - 1;  // 65535
 
     // 左移量
-    private static final int  NODE_ID_SHIFT  = SEQUENCE_BITS;               // 16
-    private static final int  TIMESTAMP_SHIFT = NODE_ID_BITS + SEQUENCE_BITS; // 21
+    private static final int NODE_ID_SHIFT = SEQUENCE_BITS;               // 16
+    private static final int TIMESTAMP_SHIFT = NODE_ID_BITS + SEQUENCE_BITS; // 21
 
     // 自定义纪元（2024-01-01 00:00:00 UTC，减小时间戳值）
     private static final long EPOCH_MS = 1704067200000L;
@@ -986,7 +1026,7 @@ public final class SnowflakeIdGenerator {
     public SnowflakeIdGenerator(final int nodeId) {
         if (nodeId < 0 || nodeId > MAX_NODE_ID) {
             throw new IllegalArgumentException(
-                "nodeId must be in [0, " + MAX_NODE_ID + "], got: " + nodeId);
+                    "nodeId must be in [0, " + MAX_NODE_ID + "], got: " + nodeId);
         }
         this.nodeId = nodeId;
     }
@@ -1013,15 +1053,15 @@ public final class SnowflakeIdGenerator {
         } else {
             // 时钟回拨（NTP 调整等），抛出异常防止 ID 重复
             throw new IllegalStateException(
-                "Clock moved backwards! lastMs=" + lastTimestampMs +
-                ", currentMs=" + currentMs);
+                    "Clock moved backwards! lastMs=" + lastTimestampMs +
+                            ", currentMs=" + currentMs);
         }
 
         lastTimestampMs = currentMs;
 
         return (currentMs << TIMESTAMP_SHIFT)
-             | (nodeId   << NODE_ID_SHIFT)
-             | sequence;
+                | (nodeId << NODE_ID_SHIFT)
+                | sequence;
     }
 
     private long waitNextMillis(final long lastMs) {
@@ -1064,7 +1104,7 @@ public interface NanoTimeProvider {
     NanoTimeProvider SYSTEM = new NanoTimeProvider() {
         // JVM 启动时记录 epoch 偏移
         private final long epochOffsetNs =
-            System.currentTimeMillis() * 1_000_000L - System.nanoTime();
+                System.currentTimeMillis() * 1_000_000L - System.nanoTime();
 
         @Override
         public long nanoTime() {
@@ -1106,7 +1146,8 @@ public final class PriceUtil {
         }
     }
 
-    private PriceUtil() {}
+    private PriceUtil() {
+    }
 
     /**
      * double → long（用于从外部输入转换，仅在非热路径使用）
@@ -1144,15 +1185,15 @@ public final class PriceUtil {
      */
     public static long calcAmount(final long price,
                                   final long quantity,
-                                  final int  pricePrecision,
-                                  final int  quantityPrecision,
-                                  final int  resultPrecision) {
+                                  final int pricePrecision,
+                                  final int quantityPrecision,
+                                  final int resultPrecision) {
         // 使用 128 位中间值防止溢出（Java 没有 uint128，用两步除法）
         // price * quantity 可能超过 long，需小心
         // 简化版本（适用于 price/quantity 不超过 10^12 的场景）：
         return Math.multiplyHigh(price, quantity) == 0
-            ? (price * quantity * POW10[resultPrecision]) / POW10[pricePrecision + quantityPrecision]
-            : (long) ((double) price * quantity / POW10[pricePrecision + quantityPrecision - resultPrecision]);
+                ? (price * quantity * POW10[resultPrecision]) / POW10[pricePrecision + quantityPrecision]
+                : (long) ((double) price * quantity / POW10[pricePrecision + quantityPrecision - resultPrecision]);
     }
 
     /**
@@ -1170,8 +1211,8 @@ public final class PriceUtil {
      * @return long 手续费（与 amount 同精度）
      */
     public static long calcFee(final long amount,
-                               final int  feeRateMicros,
-                               final int  amountPrecision) {
+                               final int feeRateMicros,
+                               final int amountPrecision) {
         // fee = amount * feeRateMicros / 1_000_000
         return (amount * feeRateMicros) / 1_000_000L;
     }
@@ -1294,8 +1335,10 @@ public final class ObjectPool<T> {
 package com.trading.util;
 
 import org.junit.jupiter.api.Test;
+
 import java.util.HashSet;
 import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class SnowflakeIdGeneratorTest {
@@ -1338,6 +1381,7 @@ class SnowflakeIdGeneratorTest {
 package com.trading.util;
 
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class PriceUtilTest {
@@ -1346,13 +1390,13 @@ class PriceUtilTest {
     void shouldConvertDoubleToLong() {
         // 50000.25 USDT，精度 2 → 5000025L
         assertEquals(5000025L, PriceUtil.toLong(50000.25, 2));
-        assertEquals(100000L,  PriceUtil.toLong(1.00000, 5));  // 1 BTC，精度 5
+        assertEquals(100000L, PriceUtil.toLong(1.00000, 5));  // 1 BTC，精度 5
     }
 
     @Test
     void shouldConvertLongToDouble() {
         assertEquals(50000.25, PriceUtil.toDouble(5000025L, 2), 1e-10);
-        assertEquals(1.0,      PriceUtil.toDouble(100000L, 5),  1e-10);
+        assertEquals(1.0, PriceUtil.toDouble(100000L, 5), 1e-10);
     }
 
     @Test
@@ -1442,13 +1486,13 @@ public class AeronIpcDemo {
     private static final Logger log = LoggerFactory.getLogger(AeronIpcDemo.class);
 
     // IPC 通道（同进程内，零拷贝共享内存）
-    private static final String CHANNEL   = "aeron:ipc";
-    private static final int    STREAM_ID = 1;
+    private static final String CHANNEL = "aeron:ipc";
+    private static final int STREAM_ID = 1;
 
     // Demo 参数
-    private static final int  MESSAGE_COUNT    = 1_000_000;  // 发送 100 万条消息
-    private static final int  MESSAGE_LENGTH   = 64;          // 每条消息 64 字节
-    private static final long WARMUP_COUNT     = 10_000;      // 预热 1 万条
+    private static final int MESSAGE_COUNT = 1_000_000;  // 发送 100 万条消息
+    private static final int MESSAGE_LENGTH = 64;          // 每条消息 64 字节
+    private static final long WARMUP_COUNT = 10_000;      // 预热 1 万条
 
     public static void main(final String[] args) throws Exception {
 
@@ -1456,13 +1500,13 @@ public class AeronIpcDemo {
         //    DEDICATED 模式：Conductor/Sender/Receiver 各自独立线程
         //    SHARED 模式：所有角色共用一个线程（低延迟场景不推荐）
         final MediaDriver.Context driverCtx = new MediaDriver.Context()
-            .dirDeleteOnStart(true)           // 启动时清理旧的 aeron 目录
-            .dirDeleteOnShutdown(true)        // 关闭时清理
-            .threadingMode(ThreadingMode.DEDICATED)  // 专用线程模式
-            .conductorIdleStrategy(new BusySpinIdleStrategy())   // Conductor 忙轮询
-            .senderIdleStrategy(new BusySpinIdleStrategy())      // Sender 忙轮询
-            .receiverIdleStrategy(new BusySpinIdleStrategy())    // Receiver 忙轮询
-            .aeronDirectoryName(System.getProperty("aeron.dir", "/tmp/aeron-demo"));
+                .dirDeleteOnStart(true)           // 启动时清理旧的 aeron 目录
+                .dirDeleteOnShutdown(true)        // 关闭时清理
+                .threadingMode(ThreadingMode.DEDICATED)  // 专用线程模式
+                .conductorIdleStrategy(new BusySpinIdleStrategy())   // Conductor 忙轮询
+                .senderIdleStrategy(new BusySpinIdleStrategy())      // Sender 忙轮询
+                .receiverIdleStrategy(new BusySpinIdleStrategy())    // Receiver 忙轮询
+                .aeronDirectoryName(System.getProperty("aeron.dir", "/tmp/aeron-demo"));
 
         log.info("Starting Aeron Media Driver at: {}", driverCtx.aeronDirectoryName());
 
@@ -1470,7 +1514,7 @@ public class AeronIpcDemo {
 
             // 2. 创建 Aeron 客户端
             final Aeron.Context aeronCtx = new Aeron.Context()
-                .aeronDirectoryName(driverCtx.aeronDirectoryName());
+                    .aeronDirectoryName(driverCtx.aeronDirectoryName());
 
             try (Aeron aeron = Aeron.connect(aeronCtx);
                  Publication publication = aeron.addPublication(CHANNEL, STREAM_ID);
@@ -1485,8 +1529,8 @@ public class AeronIpcDemo {
                 final CountDownLatch doneLatch = new CountDownLatch(1);
 
                 final Thread subscriberThread = new Thread(() ->
-                    runSubscriber(subscription, receivedCount, MESSAGE_COUNT, doneLatch),
-                    "subscriber-thread"
+                        runSubscriber(subscription, receivedCount, MESSAGE_COUNT, doneLatch),
+                        "subscriber-thread"
                 );
                 subscriberThread.setDaemon(true);
                 subscriberThread.start();
@@ -1592,9 +1636,9 @@ public class AeronIpcDemo {
                                    final long totalNs,
                                    final long sendOnlyNs) {
         final double totalMs = totalNs / 1e6;
-        final double sendMs  = sendOnlyNs / 1e6;
-        final double tps     = msgCount / (totalNs / 1e9);
-        final double avgNs   = (double) totalNs / msgCount;
+        final double sendMs = sendOnlyNs / 1e6;
+        final double tps = msgCount / (totalNs / 1e9);
+        final double avgNs = (double) totalNs / msgCount;
 
         log.info("=== Aeron IPC Demo Results ===");
         log.info("Messages       : {}", msgCount);
@@ -1706,9 +1750,9 @@ public class DisruptorPipelineDemo {
 
     private static final Logger log = LoggerFactory.getLogger(DisruptorPipelineDemo.class);
 
-    private static final int  RING_BUFFER_SIZE = 1 << 20;    // 2^20 = 1,048,576
-    private static final int  MESSAGE_COUNT    = 1_000_000;
-    private static final long WARMUP_COUNT     = 50_000;
+    private static final int RING_BUFFER_SIZE = 1 << 20;    // 2^20 = 1,048,576
+    private static final int MESSAGE_COUNT = 1_000_000;
+    private static final long WARMUP_COUNT = 50_000;
 
     // ========================= 事件定义 =========================
 
@@ -1722,7 +1766,7 @@ public class DisruptorPipelineDemo {
         // 生产者填充
         long orderId;
         long accountId;
-        int  symbolId;
+        int symbolId;
         byte side;          // 1=Buy, 2=Sell
         long price;
         long quantity;
@@ -1802,7 +1846,9 @@ public class DisruptorPipelineDemo {
             }
         }
 
-        long getJournalCount() { return journalCount; }
+        long getJournalCount() {
+            return journalCount;
+        }
     }
 
     // ========================= Stage 3b: 模拟回报 =========================
@@ -1853,24 +1899,24 @@ public class DisruptorPipelineDemo {
         };
 
         final Disruptor<OrderEvent> disruptor = new Disruptor<>(
-            new OrderEventFactory(),
-            RING_BUFFER_SIZE,
-            threadFactory,
-            ProducerType.SINGLE,    // 单生产者（更快，无需 CAS）
-            new BusySpinWaitStrategy()
+                new OrderEventFactory(),
+                RING_BUFFER_SIZE,
+                threadFactory,
+                ProducerType.SINGLE,    // 单生产者（更快，无需 CAS）
+                new BusySpinWaitStrategy()
         );
 
         // 2. 配置 Pipeline 依赖关系
         final SequenceAssignHandler stage1 = new SequenceAssignHandler();
-        final MatchingHandler       stage2 = new MatchingHandler();
-        final JournalHandler        stage3a = new JournalHandler();
-        final ExecReportHandler     stage3b = new ExecReportHandler(
-            latencyHistogram, doneLatch, MESSAGE_COUNT);
+        final MatchingHandler stage2 = new MatchingHandler();
+        final JournalHandler stage3a = new JournalHandler();
+        final ExecReportHandler stage3b = new ExecReportHandler(
+                latencyHistogram, doneLatch, MESSAGE_COUNT);
 
         disruptor
-            .handleEventsWith(stage1)       // Stage 1 先执行
-            .then(stage2)                   // Stage 2 在 Stage 1 之后
-            .then(stage3a, stage3b);        // Stage 3a 和 3b 并行（等 Stage 2 完成后）
+                .handleEventsWith(stage1)       // Stage 1 先执行
+                .then(stage2)                   // Stage 2 在 Stage 1 之后
+                .then(stage3a, stage3b);        // Stage 3a 和 3b 并行（等 Stage 2 完成后）
 
         // 3. 启动 Disruptor（启动所有消费者线程）
         final RingBuffer<OrderEvent> ringBuffer = disruptor.start();
@@ -1908,12 +1954,12 @@ public class DisruptorPipelineDemo {
             // tryPublishEvent：非阻塞，RingBuffer 满时返回 false
             // publishEvent：阻塞等待（适合压测场景）
             ringBuffer.publishEvent((event, sequence) -> {
-                event.orderId         = sequence;
-                event.accountId       = 1001L;
-                event.symbolId        = 1;
-                event.side            = (byte) (sequence % 2 == 0 ? 1 : 2);  // 交替买卖
-                event.price           = 5000000L + (sequence % 100) * 100;   // 模拟不同价格
-                event.quantity        = 100000L;
+                event.orderId = sequence;
+                event.accountId = 1001L;
+                event.symbolId = 1;
+                event.side = (byte) (sequence % 2 == 0 ? 1 : 2);  // 交替买卖
+                event.price = 5000000L + (sequence % 100) * 100;   // 模拟不同价格
+                event.quantity = 100000L;
                 event.sendTimestampNs = System.nanoTime();
             });
         }
@@ -1924,7 +1970,7 @@ public class DisruptorPipelineDemo {
                                      final Histogram histogram,
                                      final JournalHandler journalHandler) {
         final double totalMs = totalNs / 1e6;
-        final double tps     = msgCount / (totalNs / 1e9);
+        final double tps = msgCount / (totalNs / 1e9);
 
         log.info("=== Disruptor Pipeline Demo Results ===");
         log.info("Messages processed  : {}", msgCount);
@@ -2041,13 +2087,13 @@ public class FullPipelineDemo {
 
     private static final Logger log = LoggerFactory.getLogger(FullPipelineDemo.class);
 
-    private static final String INBOUND_CHANNEL  = "aeron:ipc";
-    private static final int    INBOUND_STREAM   = 10;
+    private static final String INBOUND_CHANNEL = "aeron:ipc";
+    private static final int INBOUND_STREAM = 10;
     private static final String OUTBOUND_CHANNEL = "aeron:ipc";
-    private static final int    OUTBOUND_STREAM  = 11;
+    private static final int OUTBOUND_STREAM = 11;
 
-    private static final int  RING_BUFFER_SIZE = 1 << 20;
-    private static final int  MESSAGE_COUNT    = 500_000;
+    private static final int RING_BUFFER_SIZE = 1 << 20;
+    private static final int MESSAGE_COUNT = 500_000;
 
     // ---- 消息格式（直接在 DirectBuffer 上操作）----
     // Offset 0  : int64 sequenceNo（生产者填写）
@@ -2056,11 +2102,11 @@ public class FullPipelineDemo {
     // Offset 24 : int64 processedTimestampNs（Disruptor Stage 2 填写）
     // Total: 32 bytes
 
-    static final int FIELD_SEQ_NO        = 0;
-    static final int FIELD_SEND_TS       = 8;
-    static final int FIELD_PROC_SEQ_NO   = 16;
-    static final int FIELD_PROC_TS       = 24;
-    static final int MSG_LENGTH          = 32;
+    static final int FIELD_SEQ_NO = 0;
+    static final int FIELD_SEND_TS = 8;
+    static final int FIELD_PROC_SEQ_NO = 16;
+    static final int FIELD_PROC_TS = 24;
+    static final int MSG_LENGTH = 32;
 
     // ---- 事件定义 ----
     static final class PipelineEvent {
@@ -2070,33 +2116,35 @@ public class FullPipelineDemo {
 
     static final class PipelineEventFactory implements EventFactory<PipelineEvent> {
         @Override
-        public PipelineEvent newInstance() { return new PipelineEvent(); }
+        public PipelineEvent newInstance() {
+            return new PipelineEvent();
+        }
     }
 
     public static void main(final String[] args) throws Exception {
 
         final String aeronDir = System.getProperty("aeron.dir", "/tmp/aeron-full-demo");
         final Histogram latencyHistogram = new Histogram(1, 100_000_000L, 3);
-        final CountDownLatch doneLatch   = new CountDownLatch(1);
-        final AtomicLong receivedCount   = new AtomicLong(0);
+        final CountDownLatch doneLatch = new CountDownLatch(1);
+        final AtomicLong receivedCount = new AtomicLong(0);
 
         // 1. 启动 Media Driver
         final MediaDriver.Context driverCtx = new MediaDriver.Context()
-            .dirDeleteOnStart(true)
-            .dirDeleteOnShutdown(true)
-            .threadingMode(ThreadingMode.DEDICATED)
-            .conductorIdleStrategy(new BusySpinIdleStrategy())
-            .senderIdleStrategy(new BusySpinIdleStrategy())
-            .receiverIdleStrategy(new BusySpinIdleStrategy())
-            .aeronDirectoryName(aeronDir);
+                .dirDeleteOnStart(true)
+                .dirDeleteOnShutdown(true)
+                .threadingMode(ThreadingMode.DEDICATED)
+                .conductorIdleStrategy(new BusySpinIdleStrategy())
+                .senderIdleStrategy(new BusySpinIdleStrategy())
+                .receiverIdleStrategy(new BusySpinIdleStrategy())
+                .aeronDirectoryName(aeronDir);
 
         try (MediaDriver driver = MediaDriver.launch(driverCtx);
              Aeron aeron = Aeron.connect(new Aeron.Context().aeronDirectoryName(aeronDir))) {
 
             // 2. 创建 Aeron 通道
-            try (Publication  inboundPub  = aeron.addPublication (INBOUND_CHANNEL,  INBOUND_STREAM);
-                 Subscription inboundSub  = aeron.addSubscription (INBOUND_CHANNEL,  INBOUND_STREAM);
-                 Publication  outboundPub = aeron.addPublication (OUTBOUND_CHANNEL, OUTBOUND_STREAM);
+            try (Publication inboundPub = aeron.addPublication(INBOUND_CHANNEL, INBOUND_STREAM);
+                 Subscription inboundSub = aeron.addSubscription(INBOUND_CHANNEL, INBOUND_STREAM);
+                 Publication outboundPub = aeron.addPublication(OUTBOUND_CHANNEL, OUTBOUND_STREAM);
                  Subscription outboundSub = aeron.addSubscription(OUTBOUND_CHANNEL, OUTBOUND_STREAM)) {
 
                 waitForConnection(inboundPub, inboundSub);
@@ -2104,11 +2152,11 @@ public class FullPipelineDemo {
 
                 // 3. 创建 Disruptor
                 final Disruptor<PipelineEvent> disruptor = new Disruptor<>(
-                    new PipelineEventFactory(),
-                    RING_BUFFER_SIZE,
-                    (Runnable r) -> new Thread(r, "disruptor-worker"),
-                    ProducerType.SINGLE,
-                    new BusySpinWaitStrategy()
+                        new PipelineEventFactory(),
+                        RING_BUFFER_SIZE,
+                        (Runnable r) -> new Thread(r, "disruptor-worker"),
+                        ProducerType.SINGLE,
+                        new BusySpinWaitStrategy()
                 );
 
                 // Stage 1：读取 Aeron 消息并填充 RingBuffer（由 AeronInboundSubscriber 直接 publish）
@@ -2116,33 +2164,33 @@ public class FullPipelineDemo {
                 // Stage 3：写出到 Aeron IPC outbound
 
                 final RingBuffer<PipelineEvent> ringBuffer = disruptor
-                    .handleEventsWith(
-                        // Stage 1：标记序列号
-                        (event, seq, eob) -> event.data.putLong(FIELD_PROC_SEQ_NO, seq)
-                    )
-                    .then(
-                        // Stage 2：模拟处理（记录处理时间戳）
-                        (event, seq, eob) -> event.data.putLong(FIELD_PROC_TS, System.nanoTime())
-                    )
-                    .then(
-                        // Stage 3：写出到 Aeron outbound
-                        (event, seq, eob) -> {
-                            long result;
-                            while ((result = outboundPub.offer(event.data, 0, MSG_LENGTH)) < 0) {
-                                if (result == Publication.CLOSED) break;
-                                Thread.onSpinWait();
-                            }
-                        }
-                    )
-                    .asRingBuffer();
+                        .handleEventsWith(
+                                // Stage 1：标记序列号
+                                (event, seq, eob) -> event.data.putLong(FIELD_PROC_SEQ_NO, seq)
+                        )
+                        .then(
+                                // Stage 2：模拟处理（记录处理时间戳）
+                                (event, seq, eob) -> event.data.putLong(FIELD_PROC_TS, System.nanoTime())
+                        )
+                        .then(
+                                // Stage 3：写出到 Aeron outbound
+                                (event, seq, eob) -> {
+                                    long result;
+                                    while ((result = outboundPub.offer(event.data, 0, MSG_LENGTH)) < 0) {
+                                        if (result == Publication.CLOSED) break;
+                                        Thread.onSpinWait();
+                                    }
+                                }
+                        )
+                        .asRingBuffer();
 
                 disruptor.start();
 
                 // 4. 启动 Outbound Subscriber（接收处理结果并测量延迟）
                 final Thread outboundThread = new Thread(() -> {
                     final FragmentHandler outboundHandler = (buffer, offset, length, header) -> {
-                        final long sendTs  = buffer.getLong(offset + FIELD_SEND_TS);
-                        final long procTs  = buffer.getLong(offset + FIELD_PROC_TS);
+                        final long sendTs = buffer.getLong(offset + FIELD_SEND_TS);
+                        final long procTs = buffer.getLong(offset + FIELD_PROC_TS);
                         final long latency = procTs - sendTs;
                         latencyHistogram.recordValue(Math.min(latency, 100_000_000L));
                         if (receivedCount.incrementAndGet() >= MESSAGE_COUNT) {
@@ -2183,7 +2231,7 @@ public class FullPipelineDemo {
                 final long startNs = System.nanoTime();
 
                 for (int i = 0; i < MESSAGE_COUNT; i++) {
-                    sendBuffer.putLong(FIELD_SEQ_NO,  i);
+                    sendBuffer.putLong(FIELD_SEQ_NO, i);
                     sendBuffer.putLong(FIELD_SEND_TS, System.nanoTime());
                     long result;
                     while ((result = inboundPub.offer(sendBuffer, 0, MSG_LENGTH)) < 0) {
@@ -2218,12 +2266,12 @@ public class FullPipelineDemo {
         log.info("Total time     : {:.2f} ms", totalNs / 1e6);
         log.info("Throughput     : {:.0f} msg/sec", count / (totalNs / 1e9));
         log.info("--- End-to-End Latency (send → Stage2 processing) ---");
-        log.info("P50            : {} ns",  h.getValueAtPercentile(50));
-        log.info("P95            : {} ns",  h.getValueAtPercentile(95));
-        log.info("P99            : {} ns",  h.getValueAtPercentile(99));
-        log.info("P99.9          : {} ns",  h.getValueAtPercentile(99.9));
-        log.info("P99.99         : {} ns",  h.getValueAtPercentile(99.99));
-        log.info("Max            : {} ns",  h.getMaxValue());
+        log.info("P50            : {} ns", h.getValueAtPercentile(50));
+        log.info("P95            : {} ns", h.getValueAtPercentile(95));
+        log.info("P99            : {} ns", h.getValueAtPercentile(99));
+        log.info("P99.9          : {} ns", h.getValueAtPercentile(99.9));
+        log.info("P99.99         : {} ns", h.getValueAtPercentile(99.99));
+        log.info("Max            : {} ns", h.getMaxValue());
         // Phase 1 验证目标
         final long p99 = h.getValueAtPercentile(99);
         if (p99 < 1000) {
@@ -2288,11 +2336,11 @@ public class SbeCodecBenchmark {
     @Setup
     public void setup() {
         // 预分配，只做一次
-        buffer       = new UnsafeBuffer(ByteBuffer.allocateDirect(512));
+        buffer = new UnsafeBuffer(ByteBuffer.allocateDirect(512));
         headerEncoder = new MessageHeaderEncoder();
-        orderEncoder  = new NewOrderRequestEncoder();
+        orderEncoder = new NewOrderRequestEncoder();
         headerDecoder = new MessageHeaderDecoder();
-        orderDecoder  = new NewOrderRequestDecoder();
+        orderDecoder = new NewOrderRequestDecoder();
 
         // 预填充一条消息（用于解码基准）
         encode();
@@ -2301,22 +2349,22 @@ public class SbeCodecBenchmark {
     @Benchmark
     public int encode() {
         headerEncoder.wrap(buffer, 0)
-            .blockLength(NewOrderRequestEncoder.BLOCK_LENGTH)
-            .templateId(NewOrderRequestEncoder.TEMPLATE_ID)
-            .schemaId(NewOrderRequestEncoder.SCHEMA_ID)
-            .version(NewOrderRequestEncoder.SCHEMA_VERSION);
+                .blockLength(NewOrderRequestEncoder.BLOCK_LENGTH)
+                .templateId(NewOrderRequestEncoder.TEMPLATE_ID)
+                .schemaId(NewOrderRequestEncoder.SCHEMA_ID)
+                .version(NewOrderRequestEncoder.SCHEMA_VERSION);
 
         orderEncoder.wrap(buffer, MessageHeaderEncoder.ENCODED_LENGTH)
-            .correlationId(12345L)
-            .accountId(1001L)
-            .symbolId(1)
-            .side(Side.BUY)
-            .orderType(OrderType.LIMIT)
-            .timeInForce(TimeInForce.GTC)
-            .price(5000000L)
-            .quantity(100000L)
-            .leverage((short) 1)
-            .timestamp(System.nanoTime());
+                .correlationId(12345L)
+                .accountId(1001L)
+                .symbolId(1)
+                .side(Side.BUY)
+                .orderType(OrderType.LIMIT)
+                .timeInForce(TimeInForce.GTC)
+                .price(5000000L)
+                .quantity(100000L)
+                .leverage((short) 1)
+                .timestamp(System.nanoTime());
 
         return orderEncoder.encodedLength();
     }
@@ -2325,9 +2373,9 @@ public class SbeCodecBenchmark {
     public long decode() {
         headerDecoder.wrap(buffer, 0);
         orderDecoder.wrap(buffer,
-            MessageHeaderDecoder.ENCODED_LENGTH,
-            headerDecoder.blockLength(),
-            headerDecoder.version());
+                MessageHeaderDecoder.ENCODED_LENGTH,
+                headerDecoder.blockLength(),
+                headerDecoder.version());
 
         return orderDecoder.accountId() + orderDecoder.price() + orderDecoder.quantity();
     }
@@ -2448,14 +2496,17 @@ mkdir -p /tmp/aeron-demo
 **原因：** Subscriber 消费速度低于 Publisher 发布速度，RingBuffer 被填满。
 
 **排查步骤：**
+
 1. 检查 Subscriber 是否正确启动
 2. 检查 Subscriber 的 FragmentHandler 是否有阻塞操作
 3. 检查 RingBuffer 大小是否过小
 
 ```java
 // 添加诊断日志
-if (result == Publication.BACK_PRESSURED) {
-    log.warn("Back pressured! Check subscriber throughput.");
+if(result ==Publication.BACK_PRESSURED){
+        log.
+
+warn("Back pressured! Check subscriber throughput.");
 }
 ```
 
@@ -2475,13 +2526,15 @@ mvn generate-sources -pl common/common-sbe -X 2>&1 | grep -i "sbe\|error"
 
 **原因：** macOS 没有 `/dev/shm`，Aeron IPC 使用文件系统而非真正的共享内存；macOS 内核调度精度也不如 Linux。
 
-**说明：** Phase 1 在 macOS 上开发是可以的，P99 延迟在 2~10μs 级别属于正常。生产环境需要在 Linux 裸机上运行（隔离 CPU 核心），才能达到 < 1μs 目标。
+**说明：** Phase 1 在 macOS 上开发是可以的，P99 延迟在 2~10μs 级别属于正常。生产环境需要在 Linux 裸机上运行（隔离 CPU
+核心），才能达到 < 1μs 目标。
 
 ### 9.6 `--add-opens` 相关警告/错误
 
 **原因：** Aeron 需要访问 Java 内部 API（`sun.nio.ch`）。
 
-**在 Maven 中统一配置：** 确保根 `pom.xml` 的 `maven-surefire-plugin` 和 `maven-compiler-plugin` 都包含了 `--add-opens` 参数（见第 2.2 节）。
+**在 Maven 中统一配置：** 确保根 `pom.xml` 的 `maven-surefire-plugin` 和 `maven-compiler-plugin` 都包含了 `--add-opens`
+参数（见第 2.2 节）。
 
 **在 IDE 中：** 在 Run/Debug Configuration 的 VM options 中添加：
 

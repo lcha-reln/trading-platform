@@ -135,13 +135,13 @@ public final class MatchingEvent {
 
     /** 重置（每次事件被生产者填充前，由生产者负责重置必要字段）*/
     public void reset() {
-        eventType       = 0;
-        orderNode       = null;
-        cancelOrderId   = 0L;
-        correlationId   = 0L;
+        eventType = 0;
+        orderNode = null;
+        cancelOrderId = 0L;
+        correlationId = 0L;
         matchSequenceNo = 0L;
-        cancelFound     = false;
-        cancelledNode   = null;
+        cancelFound = false;
+        cancelledNode = null;
         matchResult.reset(null);
     }
 }
@@ -393,13 +393,13 @@ public final class ExecutionReportHandler implements EventHandler<MatchingEvent>
     private final Publication execReportPublication;   // Aeron IPC stream=3
     private final MutableDirectBuffer sendBuffer;
     private final MessageHeaderEncoder headerEncoder;
-    private final MatchResultEncoder   matchResultEncoder;
+    private final MatchResultEncoder matchResultEncoder;
 
     public ExecutionReportHandler(final Publication execReportPublication) {
         this.execReportPublication = execReportPublication;
-        this.sendBuffer            = new UnsafeBuffer(ByteBuffer.allocateDirect(512));
-        this.headerEncoder         = new MessageHeaderEncoder();
-        this.matchResultEncoder    = new MatchResultEncoder();
+        this.sendBuffer = new UnsafeBuffer(ByteBuffer.allocateDirect(512));
+        this.headerEncoder = new MessageHeaderEncoder();
+        this.matchResultEncoder = new MatchResultEncoder();
     }
 
     @Override
@@ -440,24 +440,24 @@ public final class ExecutionReportHandler implements EventHandler<MatchingEvent>
     private void publishMatchResult(final long matchSeqNo, final MatchEvent e) {
         final int headerLen = MessageHeaderEncoder.ENCODED_LENGTH;
         headerEncoder.wrap(sendBuffer, 0)
-            .blockLength(MatchResultEncoder.BLOCK_LENGTH)
-            .templateId(MatchResultEncoder.TEMPLATE_ID)
-            .schemaId(MatchResultEncoder.SCHEMA_ID)
-            .version(MatchResultEncoder.SCHEMA_VERSION);
+                .blockLength(MatchResultEncoder.BLOCK_LENGTH)
+                .templateId(MatchResultEncoder.TEMPLATE_ID)
+                .schemaId(MatchResultEncoder.SCHEMA_ID)
+                .version(MatchResultEncoder.SCHEMA_VERSION);
 
         matchResultEncoder.wrap(sendBuffer, headerLen)
-            .sequenceNo(matchSeqNo)
-            .symbolId(e.symbolId)
-            .makerOrderId(e.makerOrderId)
-            .takerOrderId(e.takerOrderId)
-            .makerAccountId(e.makerAccountId)
-            .takerAccountId(e.takerAccountId)
-            .price(e.price)
-            .quantity(e.quantity)
-            .makerSide(Side.get(e.makerSide))
-            .makerFee(e.makerFee)
-            .takerFee(e.takerFee)
-            .timestamp(e.timestampNs);
+                .sequenceNo(matchSeqNo)
+                .symbolId(e.symbolId)
+                .makerOrderId(e.makerOrderId)
+                .takerOrderId(e.takerOrderId)
+                .makerAccountId(e.makerAccountId)
+                .takerAccountId(e.takerAccountId)
+                .price(e.price)
+                .quantity(e.quantity)
+                .makerSide(Side.get(e.makerSide))
+                .makerFee(e.makerFee)
+                .takerFee(e.takerFee)
+                .timestamp(e.timestampNs);
 
         final int totalLen = headerLen + MatchResultEncoder.BLOCK_LENGTH;
         final long result = execReportPublication.offer(sendBuffer, 0, totalLen);
@@ -475,9 +475,9 @@ public final class ExecutionReportHandler implements EventHandler<MatchingEvent>
         // 针对 RESTING / IOC-CANCELLED / FOK-REJECTED 等无成交事件的状态变更
         // 需单独发送 ExecutionReport 给柜台服务，此处简化为 log
         log.debug("Taker status only: status={}, orderId={}",
-                  event.matchResult.takerStatus,
-                  event.matchResult.takerNode != null
-                      ? event.matchResult.takerNode.orderId : -1);
+                event.matchResult.takerStatus,
+                event.matchResult.takerNode != null
+                        ? event.matchResult.takerNode.orderId : -1);
     }
 }
 ```

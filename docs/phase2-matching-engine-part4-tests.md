@@ -22,14 +22,14 @@
 
 ### 1.1 测试场景矩阵
 
-| 分类 | 场景 | 文件 |
-|------|------|------|
-| 数据结构 | OrderBook 增删查（见 Part 1） | `OrderBookStructureTest` |
-| 撮合冒烟 | 5 种订单类型核心路径（见 Part 2） | `OrderMatcherSmokeTest` |
-| **edge case** | 多档位扫穿、时间优先、FOK 边界等 | `OrderMatcherEdgeCaseTest`（本 Part） |
-| **异常处理** | 对象池耗尽、未知 orderType | `OrderMatcherExceptionTest`（本 Part） |
-| **手续费** | 精度、返佣、零费率 | `FeeCalculationTest`（本 Part） |
-| **MatchResult** | 列表满、reset 复用 | `MatchResultTest`（本 Part） |
+| 分类              | 场景                      | 文件                                  |
+|-----------------|-------------------------|-------------------------------------|
+| 数据结构            | OrderBook 增删查（见 Part 1） | `OrderBookStructureTest`            |
+| 撮合冒烟            | 5 种订单类型核心路径（见 Part 2）   | `OrderMatcherSmokeTest`             |
+| **edge case**   | 多档位扫穿、时间优先、FOK 边界等      | `OrderMatcherEdgeCaseTest`（本 Part）  |
+| **异常处理**        | 对象池耗尽、未知 orderType      | `OrderMatcherExceptionTest`（本 Part） |
+| **手续费**         | 精度、返佣、零费率               | `FeeCalculationTest`（本 Part）        |
+| **MatchResult** | 列表满、reset 复用            | `MatchResultTest`（本 Part）           |
 
 ### 1.2 覆盖率要求
 

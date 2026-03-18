@@ -6,20 +6,20 @@ import java.util.function.Supplier;
  * 轻量级单线程对象池。
  * <p>
  * 设计目标：
- *   - 消除热路径对象分配，实现零 GC
- *   - 非线程安全，只允许单线程使用（撮合引擎是单线程的）
- *   - 底层使用 Object[] 栈，避免泛型装箱
+ * - 消除热路径对象分配，实现零 GC
+ * - 非线程安全，只允许单线程使用（撮合引擎是单线程的）
+ * - 底层使用 Object[] 栈，避免泛型装箱
  * <p>
  * 用法示例：
- *   // 初始化（系统启动时，预分配 1024 个 OrderNode）
- *   ObjectPool<OrderNode> pool = new ObjectPool<>(OrderNode::new, 1024);
+ * // 初始化（系统启动时，预分配 1024 个 OrderNode）
+ * ObjectPool<OrderNode> pool = new ObjectPool<>(OrderNode::new, 1024);
  * <p>
- *   // 取出
- *   OrderNode node = pool.borrow();
- *   node.reset(orderId, price, quantity);
+ * // 取出
+ * OrderNode node = pool.borrow();
+ * node.reset(orderId, price, quantity);
  * <p>
- *   // 归还（成交/撤销后）
- *   pool.release(node);
+ * // 归还（成交/撤销后）
+ * pool.release(node);
  */
 public final class ObjectPool<T> {
     private final Object[] pool;
@@ -66,17 +66,23 @@ public final class ObjectPool<T> {
         // 超出容量则丢弃（不应发生，可加监控）
     }
 
-    /** 当前可用对象数量 */
+    /**
+     * 当前可用对象数量
+     */
     public int available() {
         return top;
     }
 
-    /** 池总容量 */
+    /**
+     * 池总容量
+     */
     public int capacity() {
         return pool.length;
     }
 
-    /** 是否为空 */
+    /**
+     * 是否为空
+     */
     public boolean isEmpty() {
         return top == 0;
     }

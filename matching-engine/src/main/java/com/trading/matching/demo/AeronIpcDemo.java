@@ -19,16 +19,16 @@ import java.util.concurrent.atomic.AtomicLong;
  * Aeron IPC 基础链路 Demo。
  * <p>
  * 演示：
- *   1. 在同一进程内启动 Embedded Media Driver
- *   2. 创建 Publication 和 Subscription（IPC 通道）
- *   3. Publisher 线程持续发送消息
- *   4. Subscriber 线程持续接收消息
- *   5. 统计吞吐量和确认消息完整性
+ * 1. 在同一进程内启动 Embedded Media Driver
+ * 2. 创建 Publication 和 Subscription（IPC 通道）
+ * 3. Publisher 线程持续发送消息
+ * 4. Subscriber 线程持续接收消息
+ * 5. 统计吞吐量和确认消息完整性
  * <p>
  * 运行方式：
- *   mvn exec:java -pl matching-engine \
- *     -Dexec.mainClass="com.trading.matching.demo.AeronIpcDemo" \
- *     -Daeron.dir=/tmp/aeron
+ * mvn exec:java -pl matching-engine \
+ * -Dexec.mainClass="com.trading.matching.demo.AeronIpcDemo" \
+ * -Daeron.dir=/tmp/aeron
  */
 public class AeronIpcDemo {
     private static final Logger log = LoggerFactory.getLogger(AeronIpcDemo.class);
@@ -38,9 +38,9 @@ public class AeronIpcDemo {
     private static final int STREAM_ID = 1;
 
     // Demo 参数
-    private static final int  MESSAGE_COUNT    = 1_000_000;  // 发送 100 万条消息
-    private static final int  MESSAGE_LENGTH   = 64;          // 每条消息 64 字节
-    private static final long WARMUP_COUNT     = 10_000;      // 预热 1 万条
+    private static final int MESSAGE_COUNT = 1_000_000;  // 发送 100 万条消息
+    private static final int MESSAGE_LENGTH = 64;          // 每条消息 64 字节
+    private static final long WARMUP_COUNT = 10_000;      // 预热 1 万条
 
     public static void main(final String[] args) throws Exception {
         // 1. 配置并启动 Embedded Media Driver
@@ -89,7 +89,7 @@ public class AeronIpcDemo {
                 final UnsafeBuffer sendBuffer = new UnsafeBuffer(new byte[MESSAGE_LENGTH]);
                 log.info("Warming up with {} messages...", WARMUP_COUNT);
 
-                for (int i=0; i<WARMUP_COUNT; i++) {
+                for (int i = 0; i < WARMUP_COUNT; i++) {
                     sendBuffer.putLong(0, i);
                     sendMessage(publication, sendBuffer, MESSAGE_LENGTH);
                 }
@@ -97,7 +97,7 @@ public class AeronIpcDemo {
                 // 5.正式发送消息
                 final long startNs = System.nanoTime();
 
-                for (int i=0; i<MESSAGE_COUNT; i++) {
+                for (int i = 0; i < MESSAGE_COUNT; i++) {
                     sendBuffer.putLong(0, i);
                     sendBuffer.putLong(8, System.nanoTime());
                     sendMessage(publication, sendBuffer, MESSAGE_LENGTH);
@@ -117,9 +117,9 @@ public class AeronIpcDemo {
 
     private static void printStats(int msgCount, long totalNs, long sendOnlyNs) {
         final double totalMs = totalNs / 1e6;
-        final double sendMs  = sendOnlyNs / 1e6;
-        final double tps     = msgCount / (totalNs / 1e9);
-        final double avgNs   = (double) totalNs / msgCount;
+        final double sendMs = sendOnlyNs / 1e6;
+        final double tps = msgCount / (totalNs / 1e9);
+        final double avgNs = (double) totalNs / msgCount;
 
         log.info("=== Aeron IPC Demo Results ===");
         log.info("Messages       : {}", msgCount);

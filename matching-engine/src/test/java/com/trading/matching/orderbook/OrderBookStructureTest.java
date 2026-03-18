@@ -18,18 +18,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * OrderBook 数据结构单元测试。
- *
+ * <p>
  * 覆盖：挂单、撤单、价格档位管理、对象池、统计字段。
  * 不包含撮合逻辑（见 Part 4 OrderMatcherTest）。
  *
  * @author Reln Ding
  */
 public class OrderBookStructureTest {
-    private static final int SYMBOL_ID   = 1;
-    private static final int POOL_SIZE   = 1024;
+    private static final int SYMBOL_ID = 1;
+    private static final int POOL_SIZE = 1024;
 
     private OrderNodePool pool;
-    private OrderBook     book;
+    private OrderBook book;
 
     @BeforeEach
     void setUp() {
@@ -336,11 +336,11 @@ public class OrderBookStructureTest {
         @DisplayName("recordTrade 正确累加 volume24h 和 turnover24h")
         void shouldAccumulateTradeStatistics() {
             book.recordTrade(5000_00L, 100L, 500_000L);
-            book.recordTrade(5001_00L, 50L,  250_050L);
+            book.recordTrade(5001_00L, 50L, 250_050L);
 
             assertEquals(5001_00L, book.getLastTradePrice());
-            assertEquals(50L,      book.getLastTradeQty());
-            assertEquals(150L,     book.getVolume24h());
+            assertEquals(50L, book.getLastTradeQty());
+            assertEquals(150L, book.getVolume24h());
             assertEquals(750_050L, book.getTurnover24h());
         }
     }

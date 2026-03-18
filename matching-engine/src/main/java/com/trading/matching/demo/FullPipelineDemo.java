@@ -26,26 +26,26 @@ import java.util.concurrent.atomic.AtomicLong;
  * 完整链路 Demo：Aeron IPC → Disruptor Pipeline → Aeron IPC
  * <p>
  * 此 Demo 验证：
- *   1. 外部消息通过 Aeron IPC 进入系统
- *   2. Disruptor Pipeline 处理消息（3段）
- *   3. 处理结果通过 Aeron IPC 输出
- *   4. 端到端延迟测量
+ * 1. 外部消息通过 Aeron IPC 进入系统
+ * 2. Disruptor Pipeline 处理消息（3段）
+ * 3. 处理结果通过 Aeron IPC 输出
+ * 4. 端到端延迟测量
  * <p>
  * 这是 Phase 1 的最终验证目标：
- *   单链路端到端延迟 P99 < 1μs（Linux 物理机）
+ * 单链路端到端延迟 P99 < 1μs（Linux 物理机）
  * <p>
  * 执行：mvn exec:exec@run -pl matching-engine -Dexec.mainClass=com.trading.matching.demo.FullPipelineDemo
  */
 public class FullPipelineDemo {
 
-    static final int FIELD_SEQ_NO        = 0;
-    static final int FIELD_SEND_TS       = 8;
-    static final int FIELD_PROC_SEQ_NO   = 16;
-    static final int FIELD_PROC_TS       = 24;
-    static final int MSG_LENGTH          = 32;
+    static final int FIELD_SEQ_NO = 0;
+    static final int FIELD_SEND_TS = 8;
+    static final int FIELD_PROC_SEQ_NO = 16;
+    static final int FIELD_PROC_TS = 24;
+    static final int MSG_LENGTH = 32;
     private static final Logger log = LoggerFactory.getLogger(FullPipelineDemo.class);
-    private static final String INBOUND_CHANNEL  = "aeron:ipc";
-    private static final int    INBOUND_STREAM   = 10;
+    private static final String INBOUND_CHANNEL = "aeron:ipc";
+    private static final int INBOUND_STREAM = 10;
     private static final String OUTBOUND_CHANNEL = "aeron:ipc";
 
     // ---- 消息格式（直接在 DirectBuffer 上操作）----
@@ -54,19 +54,19 @@ public class FullPipelineDemo {
     // Offset 16 : int64 processedSequenceNo（Disruptor Stage 1 填写）
     // Offset 24 : int64 processedTimestampNs（Disruptor Stage 2 填写）
     // Total: 32 bytes
-    private static final int    OUTBOUND_STREAM  = 11;
-    private static final int  RING_BUFFER_SIZE        = 1 << 20;
-    private static final int  WARMUP_COUNT            = 50_000;
-    private static final int  MESSAGE_COUNT           = 500_000;
+    private static final int OUTBOUND_STREAM = 11;
+    private static final int RING_BUFFER_SIZE = 1 << 20;
+    private static final int WARMUP_COUNT = 50_000;
+    private static final int MESSAGE_COUNT = 500_000;
     // waitForConnection 最长等待时间
-    private static final long CONNECTION_TIMEOUT_MS   = 5_000;
+    private static final long CONNECTION_TIMEOUT_MS = 5_000;
 
     public static void main(String[] args) throws InterruptedException {
         final String aeronDir = System.getProperty("aeron.dir", "/tmp/aeron-full-demo");
         final Histogram latencyHistogram = new Histogram(1, 100_000_000L, 3);
         // ping-pong 同步：每发一条消息，等 outbound 回来后置 true，主线程才发下一条
         final AtomicBoolean pongReceived = new AtomicBoolean(false);
-        final AtomicLong receivedCount   = new AtomicLong(0);
+        final AtomicLong receivedCount = new AtomicLong(0);
 
         // 1. 启动 MediaDriver
         log.info("Launching MediaDriver, aeronDir={}", aeronDir);
@@ -88,10 +88,10 @@ public class FullPipelineDemo {
             // 2. 创建 Aeron 通道
             // fix: outboundPub/outboundSub 提升到外层 try-with-resources，
             //      避免在 try 块结束后被 Disruptor Stage 3 的 lambda 引用已关闭资源
-            try (Publication  inboundPub   = aeron.addPublication(INBOUND_CHANNEL,   INBOUND_STREAM);
-                 Subscription inboundSub   = aeron.addSubscription(INBOUND_CHANNEL,   INBOUND_STREAM);
-                 Publication  outboundPub  = aeron.addPublication(OUTBOUND_CHANNEL,  OUTBOUND_STREAM);
-                 Subscription outboundSub  = aeron.addSubscription(OUTBOUND_CHANNEL, OUTBOUND_STREAM)) {
+            try (Publication inboundPub = aeron.addPublication(INBOUND_CHANNEL, INBOUND_STREAM);
+                 Subscription inboundSub = aeron.addSubscription(INBOUND_CHANNEL, INBOUND_STREAM);
+                 Publication outboundPub = aeron.addPublication(OUTBOUND_CHANNEL, OUTBOUND_STREAM);
+                 Subscription outboundSub = aeron.addSubscription(OUTBOUND_CHANNEL, OUTBOUND_STREAM)) {
 
                 log.info("Waiting for inbound connection (channel={}, stream={})...",
                         INBOUND_CHANNEL, INBOUND_STREAM);
@@ -173,9 +173,9 @@ public class FullPipelineDemo {
                 final Thread outboundThread = new Thread(() -> {
                     final FragmentHandler outboundHandler = (buffer, offset, length, header) -> {
                         final long receiveTs = System.nanoTime();
-                        final long sendTs    = buffer.getLong(offset + FIELD_SEND_TS);
-                        final long latency   = receiveTs - sendTs;
-                        final long count     = receivedCount.incrementAndGet();
+                        final long sendTs = buffer.getLong(offset + FIELD_SEND_TS);
+                        final long latency = receiveTs - sendTs;
+                        final long count = receivedCount.incrementAndGet();
                         // 跳过热身阶段，只统计正式测量数据
                         if (count > WARMUP_COUNT) {
                             latencyHistogram.recordValue(Math.min(latency, latencyHistogram.getHighestTrackableValue()));
@@ -238,7 +238,7 @@ public class FullPipelineDemo {
             // 发送前先把 pong 标志清掉
             pongReceived.setRelease(false);
 
-            buf.putLong(FIELD_SEQ_NO,  seqStart + i);
+            buf.putLong(FIELD_SEQ_NO, seqStart + i);
             buf.putLong(FIELD_SEND_TS, System.nanoTime());
             long result;
             while ((result = pub.offer(buf, 0, MSG_LENGTH)) < 0) {
@@ -259,10 +259,10 @@ public class FullPipelineDemo {
     /**
      * 等待 Publication 和 Subscription 建立连接，超时后抛出异常。
      *
-     * @param pub     待检查的 Publication
-     * @param sub     待检查的 Subscription
-     * @param name    通道名称，用于日志区分
-     * @throws InterruptedException 等待被中断
+     * @param pub  待检查的 Publication
+     * @param sub  待检查的 Subscription
+     * @param name 通道名称，用于日志区分
+     * @throws InterruptedException  等待被中断
      * @throws IllegalStateException 超过 CONNECTION_TIMEOUT_MS 仍未连接
      */
     private static void waitForConnection(final Publication pub,
@@ -288,16 +288,16 @@ public class FullPipelineDemo {
         // fix: SLF4J 不支持 {:.2f}，改用 String.format 预格式化后再传入 {}
         log.info("=== Full Pipeline (Aeron IPC + Disruptor) Results ===");
         log.info("Messages       : {}", count);
-        log.info("Total time     : {} ms",   String.format("%.2f", totalNs / 1e6));
+        log.info("Total time     : {} ms", String.format("%.2f", totalNs / 1e6));
         log.info("Throughput     : {} msg/s", String.format("%.0f", count / (totalNs / 1e9)));
         log.info("--- End-to-End Latency (inboundPub.offer -> outboundSub.poll) ---");
-        log.info("Min            : {} ns",  h.getMinValue());
-        log.info("P50            : {} ns",  h.getValueAtPercentile(50));
-        log.info("P95            : {} ns",  h.getValueAtPercentile(95));
-        log.info("P99            : {} ns",  h.getValueAtPercentile(99));
-        log.info("P99.9          : {} ns",  h.getValueAtPercentile(99.9));
-        log.info("P99.99         : {} ns",  h.getValueAtPercentile(99.99));
-        log.info("Max            : {} ns",  h.getMaxValue());
+        log.info("Min            : {} ns", h.getMinValue());
+        log.info("P50            : {} ns", h.getValueAtPercentile(50));
+        log.info("P95            : {} ns", h.getValueAtPercentile(95));
+        log.info("P99            : {} ns", h.getValueAtPercentile(99));
+        log.info("P99.9          : {} ns", h.getValueAtPercentile(99.9));
+        log.info("P99.99         : {} ns", h.getValueAtPercentile(99.99));
+        log.info("Max            : {} ns", h.getMaxValue());
         // Phase 1 验证目标
         final long p99 = h.getValueAtPercentile(99);
         if (p99 < 1_000) {
@@ -319,6 +319,8 @@ public class FullPipelineDemo {
      */
     static final class PipelineEventFactory implements EventFactory<PipelineEvent> {
         @Override
-        public PipelineEvent newInstance() { return new PipelineEvent(); }
+        public PipelineEvent newInstance() {
+            return new PipelineEvent();
+        }
     }
 }

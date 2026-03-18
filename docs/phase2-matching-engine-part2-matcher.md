@@ -268,7 +268,7 @@ import com.trading.sbe.Side;
 public final class OrderMatcher {
 
     /** 市价买单使用 Long.MAX_VALUE 作为哨兵价格，确保能匹配所有卖价 */
-    public static final long MARKET_BUY_PRICE  = Long.MAX_VALUE;
+    public static final long MARKET_BUY_PRICE = Long.MAX_VALUE;
 
     /** 市价卖单使用 0 作为哨兵价格，确保能匹配所有买价 */
     public static final long MARKET_SELL_PRICE = 0L;
@@ -291,10 +291,10 @@ public final class OrderMatcher {
                         final int makerFeeRateMicros,
                         final int takerFeeRateMicros,
                         final com.trading.util.NanoTimeProvider timeProvider) {
-        this.orderBook          = orderBook;
+        this.orderBook = orderBook;
         this.makerFeeRateMicros = makerFeeRateMicros;
         this.takerFeeRateMicros = takerFeeRateMicros;
-        this.timeProvider       = timeProvider;
+        this.timeProvider = timeProvider;
     }
 
     // ================================================================
@@ -327,7 +327,7 @@ public final class OrderMatcher {
             case 4 -> matchFok(taker, result);      // FOK
             case 5 -> matchPostOnly(taker, result); // POST_ONLY
             default -> throw new IllegalArgumentException(
-                "Unknown orderType: " + taker.orderType);
+                    "Unknown orderType: " + taker.orderType);
         }
     }
 
@@ -384,8 +384,8 @@ public final class OrderMatcher {
         if (taker.leavesQty > 0) {
             // 市价单不允许挂单，剩余量撤销
             result.takerStatus = taker.filledQty > 0
-                ? TakerStatus.PARTIAL_FILL_CANCELLED
-                : TakerStatus.CANCELLED;
+                    ? TakerStatus.PARTIAL_FILL_CANCELLED
+                    : TakerStatus.CANCELLED;
         } else {
             result.takerStatus = TakerStatus.FULLY_FILLED;
         }
@@ -403,8 +403,8 @@ public final class OrderMatcher {
 
         if (taker.leavesQty > 0) {
             result.takerStatus = taker.filledQty > 0
-                ? TakerStatus.PARTIAL_FILL_CANCELLED
-                : TakerStatus.CANCELLED;
+                    ? TakerStatus.PARTIAL_FILL_CANCELLED
+                    : TakerStatus.CANCELLED;
         } else {
             result.takerStatus = TakerStatus.FULLY_FILLED;
         }
@@ -439,11 +439,11 @@ public final class OrderMatcher {
     private boolean canFillCompletely(final OrderNode taker) {
         long remaining = taker.quantity;
         final java.util.TreeMap<Long, PriceLevel> oppositeSide =
-            taker.isBuy() ? orderBook.getAsks() : orderBook.getBids();
+                taker.isBuy() ? orderBook.getAsks() : orderBook.getBids();
 
         for (final java.util.Map.Entry<Long, PriceLevel> entry : oppositeSide.entrySet()) {
             final long levelPrice = entry.getKey();
-            if (taker.isBuy()  && levelPrice > taker.price) break; // 卖价超出买价上限
+            if (taker.isBuy() && levelPrice > taker.price) break; // 卖价超出买价上限
             if (taker.isSell() && levelPrice < taker.price) break; // 买价低于卖价下限
 
             remaining -= Math.min(remaining, entry.getValue().totalQty);
@@ -501,38 +501,38 @@ public final class OrderMatcher {
      */
     private void executeCoreMatch(final OrderNode taker, final MatchResult result) {
         final java.util.TreeMap<Long, PriceLevel> oppositeSide =
-            taker.isBuy() ? orderBook.getAsks() : orderBook.getBids();
+                taker.isBuy() ? orderBook.getAsks() : orderBook.getBids();
 
         while (taker.leavesQty > 0 && !oppositeSide.isEmpty()) {
             final java.util.Map.Entry<Long, PriceLevel> bestEntry = oppositeSide.firstEntry();
             final long bestPrice = bestEntry.getKey();
 
             // 价格匹配检查
-            if (taker.isBuy()  && bestPrice > taker.price) break;  // 最低卖价 > 买单价格
+            if (taker.isBuy() && bestPrice > taker.price) break;  // 最低卖价 > 买单价格
             if (taker.isSell() && bestPrice < taker.price) break;  // 最高买价 < 卖单价格
 
             final PriceLevel level = bestEntry.getValue();
             OrderNode maker = level.head;
 
             while (maker != null && taker.leavesQty > 0) {
-                final long fillQty   = Math.min(taker.leavesQty, maker.leavesQty);
+                final long fillQty = Math.min(taker.leavesQty, maker.leavesQty);
                 final long fillPrice = maker.price;   // Maker 价格优先
-                final long nowNs     = timeProvider.nanoTime();
+                final long nowNs = timeProvider.nanoTime();
 
                 // 写入成交事件
                 final MatchEvent event = result.events.next();
                 if (event != null) {
-                    event.symbolId         = orderBook.symbolId;
-                    event.makerOrderId     = maker.orderId;
-                    event.takerOrderId     = taker.orderId;
-                    event.makerAccountId   = maker.accountId;
-                    event.takerAccountId   = taker.accountId;
-                    event.price            = fillPrice;
-                    event.quantity         = fillQty;
-                    event.makerSide        = maker.side;
-                    event.makerFee         = calcFee(fillPrice, fillQty, makerFeeRateMicros);
-                    event.takerFee         = calcFee(fillPrice, fillQty, takerFeeRateMicros);
-                    event.timestampNs      = nowNs;
+                    event.symbolId = orderBook.symbolId;
+                    event.makerOrderId = maker.orderId;
+                    event.takerOrderId = taker.orderId;
+                    event.makerAccountId = maker.accountId;
+                    event.takerAccountId = taker.accountId;
+                    event.price = fillPrice;
+                    event.quantity = fillQty;
+                    event.makerSide = maker.side;
+                    event.makerFee = calcFee(fillPrice, fillQty, makerFeeRateMicros);
+                    event.takerFee = calcFee(fillPrice, fillQty, takerFeeRateMicros);
+                    event.timestampNs = nowNs;
                     event.makerFullyFilled = (maker.leavesQty == fillQty);
                     event.takerFullyFilled = (taker.leavesQty == fillQty);
                 }
@@ -578,11 +578,11 @@ public final class OrderMatcher {
      * @return 手续费（固定精度 long）
      */
     private static long calcFee(final long price,
-                                 final long quantity,
-                                 final int  feeRateMicros) {
+                                final long quantity,
+                                final int feeRateMicros) {
         // 避免 long 溢出：先除后乘
         return (price / FEE_RATE_DIVISOR) * quantity * feeRateMicros
-             + (price % FEE_RATE_DIVISOR) * quantity * feeRateMicros / FEE_RATE_DIVISOR;
+                + (price % FEE_RATE_DIVISOR) * quantity * feeRateMicros / FEE_RATE_DIVISOR;
     }
 }
 ```
@@ -660,13 +660,13 @@ public final class OrderMatcher {
 
 ### 4.4 订单类型行为汇总
 
-| 订单类型 | 有剩余量时 | 无流动性时 | 挂单 |
-|---------|-----------|-----------|-----|
-| `Limit` | 挂入订单簿 `RESTING` | 直接挂单 | 是 |
-| `Market` | 剩余量撤销 `PARTIAL_FILL_CANCELLED` | `CANCELLED` | 否 |
-| `IOC` | 剩余量撤销 `PARTIAL_FILL_CANCELLED` | `CANCELLED` | 否 |
-| `FOK` | 预检不足直接 `REJECTED` | `REJECTED` | 否 |
-| `PostOnly` | 会成交则 `CANCELLED` | 直接挂单 `RESTING` | 仅当不成交 |
+| 订单类型       | 有剩余量时                          | 无流动性时          | 挂单    |
+|------------|--------------------------------|----------------|-------|
+| `Limit`    | 挂入订单簿 `RESTING`                | 直接挂单           | 是     |
+| `Market`   | 剩余量撤销 `PARTIAL_FILL_CANCELLED` | `CANCELLED`    | 否     |
+| `IOC`      | 剩余量撤销 `PARTIAL_FILL_CANCELLED` | `CANCELLED`    | 否     |
+| `FOK`      | 预检不足直接 `REJECTED`              | `REJECTED`     | 否     |
+| `PostOnly` | 会成交则 `CANCELLED`               | 直接挂单 `RESTING` | 仅当不成交 |
 
 ---
 
@@ -746,22 +746,22 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class OrderMatcherSmokeTest {
 
-    private static final int SYMBOL_ID        = 1;
+    private static final int SYMBOL_ID = 1;
     private static final int MAKER_FEE_MICROS = 1_000;   // 0.1%
     private static final int TAKER_FEE_MICROS = 2_000;   // 0.2%
 
     private OrderNodePool nodePool;
-    private OrderBook     book;
-    private OrderMatcher  matcher;
-    private MatchResult   result;
+    private OrderBook book;
+    private OrderMatcher matcher;
+    private MatchResult result;
 
     @BeforeEach
     void setUp() {
         nodePool = new OrderNodePool(1024);
-        book     = new OrderBook(SYMBOL_ID, nodePool);
-        matcher  = new OrderMatcher(book, MAKER_FEE_MICROS, TAKER_FEE_MICROS,
-                                    NanoTimeProvider.SYSTEM);
-        result   = new MatchResult(256);
+        book = new OrderBook(SYMBOL_ID, nodePool);
+        matcher = new OrderMatcher(book, MAKER_FEE_MICROS, TAKER_FEE_MICROS,
+                NanoTimeProvider.SYSTEM);
+        result = new MatchResult(256);
     }
 
     // ---- 辅助方法 ----
@@ -771,8 +771,8 @@ class OrderMatcherSmokeTest {
         final OrderNode n = nodePool.borrow();
         assertNotNull(n);
         n.init(orderId, accountId, SYMBOL_ID, side,
-               OrderType.LIMIT.value(), TimeInForce.GTC.value(),
-               price, qty, 0L, System.nanoTime());
+                OrderType.LIMIT.value(), TimeInForce.GTC.value(),
+                price, qty, 0L, System.nanoTime());
         return n;
     }
 
@@ -782,8 +782,8 @@ class OrderMatcherSmokeTest {
         final OrderNode n = nodePool.borrow();
         assertNotNull(n);
         n.init(orderId, accountId, SYMBOL_ID, side,
-               orderType, TimeInForce.GTC.value(),
-               price, qty, 0L, System.nanoTime());
+                orderType, TimeInForce.GTC.value(),
+                price, qty, 0L, System.nanoTime());
         return n;
     }
 
@@ -866,7 +866,7 @@ class OrderMatcherSmokeTest {
         matcher.match(sell, result);
 
         final OrderNode buy = makeOrderOfType(2L, 1002L, Side.BUY.value(), 0L, 100L,
-                                              OrderType.MARKET.value());
+                OrderType.MARKET.value());
         result.reset(buy);
         matcher.match(buy, result);
 
@@ -883,7 +883,7 @@ class OrderMatcherSmokeTest {
         matcher.match(sell, result);
 
         final OrderNode buy = makeOrderOfType(2L, 1002L, Side.BUY.value(), 0L, 100L,
-                                              OrderType.MARKET.value());
+                OrderType.MARKET.value());
         result.reset(buy);
         matcher.match(buy, result);
 
@@ -898,7 +898,7 @@ class OrderMatcherSmokeTest {
     @DisplayName("Market: 对手盘为空时直接撤销")
     void marketShouldCancelWhenNoBids() {
         final OrderNode sell = makeOrderOfType(1L, 1001L, Side.SELL.value(), 0L, 100L,
-                                               OrderType.MARKET.value());
+                OrderType.MARKET.value());
         result.reset(sell);
         matcher.match(sell, result);
 
@@ -918,7 +918,7 @@ class OrderMatcherSmokeTest {
         matcher.match(sell, result);
 
         final OrderNode buy = makeOrderOfType(2L, 1002L, Side.BUY.value(), 5000_00L, 100L,
-                                              OrderType.IOC.value());
+                OrderType.IOC.value());
         result.reset(buy);
         matcher.match(buy, result);
 
@@ -939,7 +939,7 @@ class OrderMatcherSmokeTest {
         matcher.match(sell, result);
 
         final OrderNode buy = makeOrderOfType(2L, 1002L, Side.BUY.value(), 5000_00L, 100L,
-                                              OrderType.FOK.value());
+                OrderType.FOK.value());
         result.reset(buy);
         matcher.match(buy, result);
 
@@ -955,7 +955,7 @@ class OrderMatcherSmokeTest {
         matcher.match(sell, result);
 
         final OrderNode buy = makeOrderOfType(2L, 1002L, Side.BUY.value(), 5000_00L, 100L,
-                                              OrderType.FOK.value());
+                OrderType.FOK.value());
         result.reset(buy);
         matcher.match(buy, result);
 
@@ -972,7 +972,7 @@ class OrderMatcherSmokeTest {
     @DisplayName("PostOnly: 无对手盘时挂单成功")
     void postOnlyShouldRestWhenNoOpposite() {
         final OrderNode buy = makeOrderOfType(1L, 1001L, Side.BUY.value(), 5000_00L, 100L,
-                                              OrderType.POST_ONLY.value());
+                OrderType.POST_ONLY.value());
         result.reset(buy);
         matcher.match(buy, result);
 
@@ -991,7 +991,7 @@ class OrderMatcherSmokeTest {
 
         // PostOnly 买单价格 >= 最优卖价 → 拒绝
         final OrderNode buy = makeOrderOfType(2L, 1002L, Side.BUY.value(), 5000_00L, 100L,
-                                              OrderType.POST_ONLY.value());
+                OrderType.POST_ONLY.value());
         result.reset(buy);
         matcher.match(buy, result);
 

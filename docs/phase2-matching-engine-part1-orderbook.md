@@ -25,13 +25,13 @@
 
 Phase 2 对应设计文档第 6 节"撮合引擎详细设计"，分 5 个 Part 依次实现：
 
-| Part | 内容 | 验证目标 |
-|------|------|---------|
-| **Part 1**（本文） | OrderBook 数据结构 | 增删查单元测试通过 |
-| Part 2 | 撮合算法（Limit/Market/IOC/FOK/PostOnly） | 所有 edge case 单元测试通过 |
-| Part 3 | Disruptor Pipeline + Aeron IPC 集成 | Pipeline 联调通过 |
-| Part 4 | 全场景单元测试 | 边界 case 100% 覆盖 |
-| Part 5 | 性能基准测试 | 单交易对 > 500K orders/sec，P99 < 5μs |
+| Part           | 内容                                  | 验证目标                             |
+|----------------|-------------------------------------|----------------------------------|
+| **Part 1**（本文） | OrderBook 数据结构                      | 增删查单元测试通过                        |
+| Part 2         | 撮合算法（Limit/Market/IOC/FOK/PostOnly） | 所有 edge case 单元测试通过              |
+| Part 3         | Disruptor Pipeline + Aeron IPC 集成   | Pipeline 联调通过                    |
+| Part 4         | 全场景单元测试                             | 边界 case 100% 覆盖                  |
+| Part 5         | 性能基准测试                              | 单交易对 > 500K orders/sec，P99 < 5μs |
 
 ### 1.2 文件结构（本 Part 新增）
 
@@ -374,10 +374,10 @@ public final class PriceLevel {
     public int orderCount;
 
     public PriceLevel(final long price) {
-        this.price      = price;
-        this.head       = null;
-        this.tail       = null;
-        this.totalQty   = 0L;
+        this.price = price;
+        this.head = null;
+        this.tail = null;
+        this.totalQty = 0L;
         this.orderCount = 0;
     }
 
@@ -438,9 +438,9 @@ public final class PriceLevel {
     @Override
     public String toString() {
         return "PriceLevel{price=" + price
-            + ", totalQty=" + totalQty
-            + ", orderCount=" + orderCount
-            + '}';
+                + ", totalQty=" + totalQty
+                + ", orderCount=" + orderCount
+                + '}';
     }
 }
 ```
@@ -517,11 +517,11 @@ public final class OrderBook {
     private int totalOrderCount;
 
     public OrderBook(final int symbolId, final OrderNodePool nodePool) {
-        this.symbolId   = symbolId;
-        this.nodePool   = nodePool;
+        this.symbolId = symbolId;
+        this.nodePool = nodePool;
         // TreeMap.reverseOrder() 使 firstKey() 始终返回最大价格（最优买价）
-        this.bids       = new TreeMap<>(java.util.Comparator.reverseOrder());
-        this.asks       = new TreeMap<>();
+        this.bids = new TreeMap<>(java.util.Comparator.reverseOrder());
+        this.asks = new TreeMap<>();
         this.orderIndex = new Long2ObjectHashMap<>(65536, 0.6f);
     }
 
@@ -692,15 +692,26 @@ public final class OrderBook {
                             final long tradeQty,
                             final long turnover) {
         lastTradePrice = tradePrice;
-        lastTradeQty   = tradeQty;
-        volume24h     += tradeQty;
-        turnover24h   += turnover;
+        lastTradeQty = tradeQty;
+        volume24h += tradeQty;
+        turnover24h += turnover;
     }
 
-    public long getLastTradePrice() { return lastTradePrice; }
-    public long getLastTradeQty()   { return lastTradeQty;   }
-    public long getVolume24h()      { return volume24h;      }
-    public long getTurnover24h()    { return turnover24h;    }
+    public long getLastTradePrice() {
+        return lastTradePrice;
+    }
+
+    public long getLastTradeQty() {
+        return lastTradeQty;
+    }
+
+    public long getVolume24h() {
+        return volume24h;
+    }
+
+    public long getTurnover24h() {
+        return turnover24h;
+    }
 
     // ================================================================
     // 对象池访问
@@ -725,12 +736,12 @@ public final class OrderBook {
     @Override
     public String toString() {
         return "OrderBook{symbolId=" + symbolId
-            + ", bids=" + bids.size() + " levels"
-            + ", asks=" + asks.size() + " levels"
-            + ", orders=" + totalOrderCount
-            + ", bestBid=" + bestBidPrice()
-            + ", bestAsk=" + bestAskPrice()
-            + '}';
+                + ", bids=" + bids.size() + " levels"
+                + ", asks=" + asks.size() + " levels"
+                + ", orders=" + totalOrderCount
+                + ", bestBid=" + bestBidPrice()
+                + ", bestAsk=" + bestAskPrice()
+                + '}';
     }
 }
 ```
@@ -766,11 +777,11 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class OrderBookStructureTest {
 
-    private static final int SYMBOL_ID   = 1;
-    private static final int POOL_SIZE   = 1024;
+    private static final int SYMBOL_ID = 1;
+    private static final int POOL_SIZE = 1024;
 
     private OrderNodePool pool;
-    private OrderBook     book;
+    private OrderBook book;
 
     @BeforeEach
     void setUp() {
@@ -790,11 +801,11 @@ class OrderBookStructureTest {
         final OrderNode node = pool.borrow();
         assertNotNull(node, "Pool is empty");
         node.init(orderId, accountId, SYMBOL_ID,
-                  side,
-                  OrderType.LIMIT.value(),
-                  TimeInForce.GTC.value(),
-                  price, quantity,
-                  0L, System.nanoTime());
+                side,
+                OrderType.LIMIT.value(),
+                TimeInForce.GTC.value(),
+                price, quantity,
+                0L, System.nanoTime());
         return node;
     }
 
@@ -1077,11 +1088,11 @@ class OrderBookStructureTest {
         @DisplayName("recordTrade 正确累加 volume24h 和 turnover24h")
         void shouldAccumulateTradeStatistics() {
             book.recordTrade(5000_00L, 100L, 500_000L);
-            book.recordTrade(5001_00L, 50L,  250_050L);
+            book.recordTrade(5001_00L, 50L, 250_050L);
 
             assertEquals(5001_00L, book.getLastTradePrice());
-            assertEquals(50L,      book.getLastTradeQty());
-            assertEquals(150L,     book.getVolume24h());
+            assertEquals(50L, book.getLastTradeQty());
+            assertEquals(150L, book.getVolume24h());
             assertEquals(750_050L, book.getTurnover24h());
         }
     }

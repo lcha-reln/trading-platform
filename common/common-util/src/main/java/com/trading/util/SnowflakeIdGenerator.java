@@ -4,28 +4,28 @@ package com.trading.util;
  * Snowflake 变体订单 ID 生成器。
  * <p>
  * 64 位结构：
- *   [63]       符号位，永远为 0
- *   [62..21]   42 bit 毫秒时间戳（可用约 139 年）
- *   [20..16]   5  bit 节点 ID（0~31，对应 Aeron Cluster 成员 ID）
- *   [15..0]    16 bit 序列号（每毫秒最多 65535 个 ID）
+ * [63]       符号位，永远为 0
+ * [62..21]   42 bit 毫秒时间戳（可用约 139 年）
+ * [20..16]   5  bit 节点 ID（0~31，对应 Aeron Cluster 成员 ID）
+ * [15..0]    16 bit 序列号（每毫秒最多 65535 个 ID）
  * <p>
  * 设计要点：
- *   - 单线程使用（撮合引擎/柜台均为单线程调度），无锁
- *   - 生成 ID 单调递增，天然有序，有利于 HashMap/TreeMap 性能
- *   - 节点 ID 区分不同 Cluster 节点，防止多节点冲突
+ * - 单线程使用（撮合引擎/柜台均为单线程调度），无锁
+ * - 生成 ID 单调递增，天然有序，有利于 HashMap/TreeMap 性能
+ * - 节点 ID 区分不同 Cluster 节点，防止多节点冲突
  */
 public final class SnowflakeIdGenerator {
     // 各字段位数
-    private static final int NODE_ID_BITS    = 5;
-    private static final int SEQUENCE_BITS   = 16;
+    private static final int NODE_ID_BITS = 5;
+    private static final int SEQUENCE_BITS = 16;
 
     // 最大值掩码
-    private static final long MAX_NODE_ID    = (1L << NODE_ID_BITS) - 1;   // 31
-    private static final long MAX_SEQUENCE   = (1L << SEQUENCE_BITS) - 1;  // 65535
+    private static final long MAX_NODE_ID = (1L << NODE_ID_BITS) - 1;   // 31
+    private static final long MAX_SEQUENCE = (1L << SEQUENCE_BITS) - 1;  // 65535
 
     // 左移量
-    private static final int  NODE_ID_SHIFT  = SEQUENCE_BITS;               // 16
-    private static final int  TIMESTAMP_SHIFT = NODE_ID_BITS + SEQUENCE_BITS; // 21
+    private static final int NODE_ID_SHIFT = SEQUENCE_BITS;               // 16
+    private static final int TIMESTAMP_SHIFT = NODE_ID_BITS + SEQUENCE_BITS; // 21
 
     // 自定义纪元（2024-01-01 00:00:00 UTC，减小时间戳值）
     private static final long EPOCH_MS = 1704067200000L;
@@ -88,7 +88,7 @@ public final class SnowflakeIdGenerator {
         long ms;
 
         do {
-            ms = System.currentTimeMillis() -  EPOCH_MS;
+            ms = System.currentTimeMillis() - EPOCH_MS;
         } while (ms <= lastMs);
 
         return ms;

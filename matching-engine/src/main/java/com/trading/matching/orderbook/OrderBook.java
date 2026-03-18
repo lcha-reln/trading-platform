@@ -22,14 +22,20 @@ import java.util.TreeMap;
  * @author Reln Ding
  */
 public class OrderBook {
-    /** 交易对 ID */
+    /**
+     * 交易对 ID
+     */
     public final int symbolId;
 
-    /** 买盘价格档位：价格降序（最优买价在首位）*/
+    /**
+     * 买盘价格档位：价格降序（最优买价在首位）
+     */
     // 注：生产环境可换为 Agrona LongTreeMap；此处用 JDK TreeMap 降低依赖复杂度
     private final TreeMap<Long, PriceLevel> bids;
 
-    /** 卖盘价格档位：价格升序（最优卖价在首位）*/
+    /**
+     * 卖盘价格档位：价格升序（最优卖价在首位）
+     */
     private final TreeMap<Long, PriceLevel> asks;
 
     /**
@@ -38,32 +44,44 @@ public class OrderBook {
      */
     private final Long2ObjectHashMap<OrderNode> orderIndex;
 
-    /** OrderNode 对象池（由外部注入，多个 OrderBook 可共享同一个池）*/
+    /**
+     * OrderNode 对象池（由外部注入，多个 OrderBook 可共享同一个池）
+     */
     private final OrderNodePool nodePool;
 
     // ---- 统计字段 ----
 
-    /** 最新成交价 */
+    /**
+     * 最新成交价
+     */
     private long lastTradePrice;
 
-    /** 最新成交量 */
+    /**
+     * 最新成交量
+     */
     private long lastTradeQty;
 
-    /** 24 小时成交量（累计，需定时重置）*/
+    /**
+     * 24 小时成交量（累计，需定时重置）
+     */
     private long volume24h;
 
-    /** 24 小时成交额（累计）*/
+    /**
+     * 24 小时成交额（累计）
+     */
     private long turnover24h;
 
-    /** 当前簿中挂单总数 */
+    /**
+     * 当前簿中挂单总数
+     */
     private int totalOrderCount;
 
     public OrderBook(final int symbolId, final OrderNodePool nodePool) {
-        this.symbolId   = symbolId;
-        this.nodePool   = nodePool;
+        this.symbolId = symbolId;
+        this.nodePool = nodePool;
         // TreeMap.reverseOrder() 使 firstKey() 始终返回最大价格（最优买价）
-        this.bids       = new TreeMap<>(java.util.Comparator.reverseOrder());
-        this.asks       = new TreeMap<>();
+        this.bids = new TreeMap<>(java.util.Comparator.reverseOrder());
+        this.asks = new TreeMap<>();
         this.orderIndex = new Long2ObjectHashMap<>(65536, 0.6f);
     }
 
@@ -210,17 +228,23 @@ public class OrderBook {
         return asks;
     }
 
-    /** 买盘是否为空 */
+    /**
+     * 买盘是否为空
+     */
     public boolean isBidEmpty() {
         return bids.isEmpty();
     }
 
-    /** 卖盘是否为空 */
+    /**
+     * 卖盘是否为空
+     */
     public boolean isAskEmpty() {
         return asks.isEmpty();
     }
 
-    /** 当前簿中挂单总数 */
+    /**
+     * 当前簿中挂单总数
+     */
     public int getTotalOrderCount() {
         return totalOrderCount;
     }
@@ -240,15 +264,26 @@ public class OrderBook {
                             final long tradeQty,
                             final long turnover) {
         lastTradePrice = tradePrice;
-        lastTradeQty   = tradeQty;
-        volume24h     += tradeQty;
-        turnover24h   += turnover;
+        lastTradeQty = tradeQty;
+        volume24h += tradeQty;
+        turnover24h += turnover;
     }
 
-    public long getLastTradePrice() { return lastTradePrice; }
-    public long getLastTradeQty()   { return lastTradeQty;   }
-    public long getVolume24h()      { return volume24h;      }
-    public long getTurnover24h()    { return turnover24h;    }
+    public long getLastTradePrice() {
+        return lastTradePrice;
+    }
+
+    public long getLastTradeQty() {
+        return lastTradeQty;
+    }
+
+    public long getVolume24h() {
+        return volume24h;
+    }
+
+    public long getTurnover24h() {
+        return turnover24h;
+    }
 
     // ================================================================
     // 对象池访问

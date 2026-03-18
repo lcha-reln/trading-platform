@@ -896,7 +896,8 @@ mvn test -pl counter-service -Dtest=RiskCheckerTest -Dcheckstyle.skip=true
 ## Part 3 完成检查清单
 
 - [ ] `RejectReason` 枚举 11 个值与 SBE Schema 一一对应
-- [ ] `BalanceRiskChecker`：Spot 4 种场景（LimitBuy/LimitSell/MarketBuy/MarketSell）+ Contract Open，每种均有 pass/fail/noAccount 三个测试
+- [ ] `BalanceRiskChecker`：Spot 4 种场景（LimitBuy/LimitSell/MarketBuy/MarketSell）+ Contract Open，每种均有
+  pass/fail/noAccount 三个测试
 - [ ] `PositionRiskChecker`：空仓、未超限、超限三个场景均有测试
 - [ ] `PriceBandChecker`：参考价为 0（跳过）、价格在范围内、恰好在边界、超上界、低于下界五个场景均有测试
 - [ ] `PriceBandChecker.checkQuantity` / `checkPrice`：覆盖 0、负数、超范围、step 不对齐

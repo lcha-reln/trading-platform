@@ -17,7 +17,9 @@ import org.slf4j.LoggerFactory;
  * @author Reln Ding
  */
 public class OrderNodePool {
-    /** 默认容量：支持 100 万在途订单 */
+    /**
+     * 默认容量：支持 100 万在途订单
+     */
     public static final int DEFAULT_CAPACITY = 1_000_000;
     private static final Logger log = LoggerFactory.getLogger(OrderNodePool.class);
 
@@ -64,17 +66,23 @@ public class OrderNodePool {
         log.error("超出容量说明有重复归还 BUG，静默丢弃并可在此处加监控");
     }
 
-    /** 当前可借出数量 */
+    /**
+     * 当前可借出数量
+     */
     public int available() {
         return top;
     }
 
-    /** 池总容量 */
+    /**
+     * 池总容量
+     */
     public int capacity() {
         return pool.length;
     }
 
-    /** 是否已空 */
+    /**
+     * 是否已空
+     */
     public boolean isEmpty() {
         return top == 0;
     }

@@ -26,13 +26,13 @@
 
 Phase 3 对应设计文档第 5 节"柜台服务详细设计"，分 5 个 Part 依次实现：
 
-| Part | 内容 | 验证目标 |
-|------|------|---------|
-| **Part 1**（本文） | 领域模型定义 | 精度计算、状态流转单元测试 |
-| Part 2 | AccountManager + PositionManager | 余额/仓位 CRUD 测试通过 |
-| Part 3 | 风控模块 + FeeCalculator | 拒绝场景 100% 覆盖 |
-| Part 4 | 柜台 Disruptor Pipeline（5 段 Handler）+ ExecutionReportProcessor | Pipeline 联调通过 |
-| Part 5 | ClusteredService 集成 + 全量单测 + 验收清单 | 完整链路 P99 < 10μs |
+| Part           | 内容                                                           | 验证目标            |
+|----------------|--------------------------------------------------------------|-----------------|
+| **Part 1**（本文） | 领域模型定义                                                       | 精度计算、状态流转单元测试   |
+| Part 2         | AccountManager + PositionManager                             | 余额/仓位 CRUD 测试通过 |
+| Part 3         | 风控模块 + FeeCalculator                                         | 拒绝场景 100% 覆盖    |
+| Part 4         | 柜台 Disruptor Pipeline（5 段 Handler）+ ExecutionReportProcessor | Pipeline 联调通过   |
+| Part 5         | ClusteredService 集成 + 全量单测 + 验收清单                            | 完整链路 P99 < 10μs |
 
 ### 1.2 新增文件结构
 

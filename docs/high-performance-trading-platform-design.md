@@ -78,14 +78,14 @@
 
 ### 2.1 模块清单
 
-| 模块 | 部署单元 | 核心职责 | 关键技术 |
-|------|---------|---------|---------|
-| **gateway-service** | 独立进程（多实例） | 客户端接入、鉴权、限流、SBE 编码 | Netty、Aeron UDP |
-| **counter-service** | Aeron Cluster 状态机 | 账户/仓位/订单管理、风控、公共数据 | Disruptor、Agrona |
-| **matching-engine** | 内嵌在 Cluster 状态机 | 订单簿撮合、成交分发 | Disruptor、Agrona |
-| **push-service** | 独立进程（多实例） | 行情推送、成交回报推送 | Aeron、Netty WebSocket |
-| **journal-service** | 独立进程 | 事件日志写入、状态恢复 | Aeron、MappedFile |
-| **common** | 共享库 | SBE 编解码、领域模型、工具类 | SBE、Agrona |
+| 模块                  | 部署单元              | 核心职责               | 关键技术                  |
+|---------------------|-------------------|--------------------|-----------------------|
+| **gateway-service** | 独立进程（多实例）         | 客户端接入、鉴权、限流、SBE 编码 | Netty、Aeron UDP       |
+| **counter-service** | Aeron Cluster 状态机 | 账户/仓位/订单管理、风控、公共数据 | Disruptor、Agrona      |
+| **matching-engine** | 内嵌在 Cluster 状态机   | 订单簿撮合、成交分发         | Disruptor、Agrona      |
+| **push-service**    | 独立进程（多实例）         | 行情推送、成交回报推送        | Aeron、Netty WebSocket |
+| **journal-service** | 独立进程              | 事件日志写入、状态恢复        | Aeron、MappedFile      |
+| **common**          | 共享库               | SBE 编解码、领域模型、工具类   | SBE、Agrona            |
 
 ### 2.2 进程拓扑
 
@@ -125,39 +125,39 @@
 
 #### 入站消息（客户端 → 柜台）
 
-| 消息 | templateId | 说明 |
-|------|-----------|------|
-| `NewOrderRequest` | 1 | 新建订单 |
-| `CancelOrderRequest` | 2 | 撤销订单 |
-| `ModifyOrderRequest` | 3 | 改单（价格/数量） |
-| `QueryOrderRequest` | 4 | 查询订单 |
-| `QueryPositionRequest` | 5 | 查询仓位 |
-| `QueryBalanceRequest` | 6 | 查询余额 |
+| 消息                     | templateId | 说明        |
+|------------------------|------------|-----------|
+| `NewOrderRequest`      | 1          | 新建订单      |
+| `CancelOrderRequest`   | 2          | 撤销订单      |
+| `ModifyOrderRequest`   | 3          | 改单（价格/数量） |
+| `QueryOrderRequest`    | 4          | 查询订单      |
+| `QueryPositionRequest` | 5          | 查询仓位      |
+| `QueryBalanceRequest`  | 6          | 查询余额      |
 
 #### 出站消息（柜台 → 客户端回报）
 
-| 消息 | templateId | 说明 |
-|------|-----------|------|
-| `ExecutionReport` | 101 | 订单状态变更回报（新建/部分成交/全成交/撤销/拒绝） |
-| `OrderReject` | 102 | 订单被拒绝（含拒绝原因） |
-| `PositionUpdate` | 103 | 仓位变更推送 |
-| `BalanceUpdate` | 104 | 余额变更推送 |
+| 消息                | templateId | 说明                          |
+|-------------------|------------|-----------------------------|
+| `ExecutionReport` | 101        | 订单状态变更回报（新建/部分成交/全成交/撤销/拒绝） |
+| `OrderReject`     | 102        | 订单被拒绝（含拒绝原因）                |
+| `PositionUpdate`  | 103        | 仓位变更推送                      |
+| `BalanceUpdate`   | 104        | 余额变更推送                      |
 
 #### 内部消息（柜台 → 撮合引擎）
 
-| 消息 | templateId | 说明 |
-|------|-----------|------|
-| `InternalNewOrder` | 201 | 经风控通过后的订单 |
-| `InternalCancelOrder` | 202 | 撤单指令 |
-| `InternalModifyOrder` | 203 | 改单指令 |
+| 消息                    | templateId | 说明        |
+|-----------------------|------------|-----------|
+| `InternalNewOrder`    | 201        | 经风控通过后的订单 |
+| `InternalCancelOrder` | 202        | 撤单指令      |
+| `InternalModifyOrder` | 203        | 改单指令      |
 
 #### 撮合回报（撮合引擎 → 柜台 / 推送）
 
-| 消息 | templateId | 说明 |
-|------|-----------|------|
-| `MatchResult` | 301 | 成交结果（可能包含多笔成交） |
-| `OrderBookUpdate` | 302 | 订单簿变更（用于深度推送） |
-| `TradeEvent` | 303 | 成交事件（用于成交流推送） |
+| 消息                | templateId | 说明             |
+|-------------------|------------|----------------|
+| `MatchResult`     | 301        | 成交结果（可能包含多笔成交） |
+| `OrderBookUpdate` | 302        | 订单簿变更（用于深度推送）  |
+| `TradeEvent`      | 303        | 成交事件（用于成交流推送）  |
 
 ### 3.3 关键消息字段设计
 
@@ -227,16 +227,16 @@ timestamp          int64    成交时间戳 (ns)
 
 ### 4.1 Channel 规划
 
-| 通道名 | 类型 | 方向 | 说明 |
-|--------|------|------|------|
-| `aeron:ipc` stream=1 | IPC | Gateway → Counter | 入站订单流 |
-| `aeron:ipc` stream=2 | IPC | Counter → MatchEngine | 内部订单流 |
-| `aeron:ipc` stream=3 | IPC | MatchEngine → Counter | 成交回报流 |
-| `aeron:ipc` stream=4 | IPC | MatchEngine → Push | 行情/成交事件流 |
-| `aeron:ipc` stream=5 | IPC | MatchEngine → Journal | 持久化事件流 |
-| `aeron:udp?endpoint=...` | UDP | Gateway → Cluster Ingress | 跨进程入站（多网关） |
-| `aeron:udp?endpoint=...` | UDP | Cluster Egress → Gateway | 回报下发 |
-| `aeron:udp?endpoint=...` | UDP | Push → Client WebSocket | 行情订阅（经 Push Service 转换） |
+| 通道名                      | 类型  | 方向                        | 说明                      |
+|--------------------------|-----|---------------------------|-------------------------|
+| `aeron:ipc` stream=1     | IPC | Gateway → Counter         | 入站订单流                   |
+| `aeron:ipc` stream=2     | IPC | Counter → MatchEngine     | 内部订单流                   |
+| `aeron:ipc` stream=3     | IPC | MatchEngine → Counter     | 成交回报流                   |
+| `aeron:ipc` stream=4     | IPC | MatchEngine → Push        | 行情/成交事件流                |
+| `aeron:ipc` stream=5     | IPC | MatchEngine → Journal     | 持久化事件流                  |
+| `aeron:udp?endpoint=...` | UDP | Gateway → Cluster Ingress | 跨进程入站（多网关）              |
+| `aeron:udp?endpoint=...` | UDP | Cluster Egress → Gateway  | 回报下发                    |
+| `aeron:udp?endpoint=...` | UDP | Push → Client WebSocket   | 行情订阅（经 Push Service 转换） |
 
 ### 4.2 Aeron Media Driver 部署策略
 
@@ -252,13 +252,13 @@ timestamp          int64    成交时间戳 (ns)
 
 ### 4.4 Idle Strategy 选型
 
-| 场景 | IdleStrategy | 说明 |
-|------|-------------|------|
-| 撮合引擎热路径 | `BusySpinIdleStrategy` | 全速轮询，最低延迟，独占 CPU 核心 |
-| Counter 处理线程 | `BusySpinIdleStrategy` | 同上 |
-| Gateway 收发线程 | `SleepingMillisIdleStrategy(0)` | 轻量自旋 |
-| Journal 写入线程 | `SleepingIdleStrategy(1ms)` | 允许稍高延迟 |
-| Push 广播线程 | `SleepingMillisIdleStrategy(1)` | 允许毫秒级延迟 |
+| 场景           | IdleStrategy                    | 说明                  |
+|--------------|---------------------------------|---------------------|
+| 撮合引擎热路径      | `BusySpinIdleStrategy`          | 全速轮询，最低延迟，独占 CPU 核心 |
+| Counter 处理线程 | `BusySpinIdleStrategy`          | 同上                  |
+| Gateway 收发线程 | `SleepingMillisIdleStrategy(0)` | 轻量自旋                |
+| Journal 写入线程 | `SleepingIdleStrategy(1ms)`     | 允许稍高延迟              |
+| Push 广播线程    | `SleepingMillisIdleStrategy(1)` | 允许毫秒级延迟             |
 
 ---
 
@@ -322,14 +322,14 @@ AccountBalance {
 
 **余额操作规则：**
 
-| 操作 | available | frozen |
-|------|-----------|--------|
-| 买单挂单（Limit Buy） | -quote_frozen | +quote_frozen |
-| 卖单挂单（Limit Sell） | -base_frozen | +base_frozen |
-| 成交（买方） | +base_received | -quote_deducted |
-| 成交（卖方） | +quote_received | -base_deducted |
-| 撤单 | +解冻金额 | -解冻金额 |
-| 市价买单 | -quote_frozen (预估) | +quote_frozen |
+| 操作               | available          | frozen          |
+|------------------|--------------------|-----------------|
+| 买单挂单（Limit Buy）  | -quote_frozen      | +quote_frozen   |
+| 卖单挂单（Limit Sell） | -base_frozen       | +base_frozen    |
+| 成交（买方）           | +base_received     | -quote_deducted |
+| 成交（卖方）           | +quote_received    | -base_deducted  |
+| 撤单               | +解冻金额              | -解冻金额           |
+| 市价买单             | -quote_frozen (预估) | +quote_frozen   |
 
 #### 保证金结构（Perp/Futures）
 
@@ -651,15 +651,15 @@ OrderBook 完整快照（用于恢复）：
 
 ### 7.2 推送频道定义
 
-| 频道 | 触发条件 | 数据内容 |
-|------|---------|---------|
-| `depth@{symbol}@{level}` | 订单簿变化 | 全量/差量深度（5/10/20档） |
-| `trade@{symbol}` | 每笔成交 | 成交价、量、方向、时间 |
-| `ticker@{symbol}` | 每笔成交 | 最新价、24h涨跌幅、量 |
-| `order@{account}` | 个人订单状态变更 | ExecutionReport |
-| `position@{account}` | 仓位变更 | PositionUpdate |
-| `balance@{account}` | 余额变更 | BalanceUpdate |
-| `kline@{symbol}@{interval}` | 定时聚合 | OHLCV K线数据 |
+| 频道                          | 触发条件     | 数据内容              |
+|-----------------------------|----------|-------------------|
+| `depth@{symbol}@{level}`    | 订单簿变化    | 全量/差量深度（5/10/20档） |
+| `trade@{symbol}`            | 每笔成交     | 成交价、量、方向、时间       |
+| `ticker@{symbol}`           | 每笔成交     | 最新价、24h涨跌幅、量      |
+| `order@{account}`           | 个人订单状态变更 | ExecutionReport   |
+| `position@{account}`        | 仓位变更     | PositionUpdate    |
+| `balance@{account}`         | 余额变更     | BalanceUpdate     |
+| `kline@{symbol}@{interval}` | 定时聚合     | OHLCV K线数据        |
 
 ### 7.3 订阅管理
 
@@ -706,6 +706,7 @@ interface ClusteredService {
 ```
 
 **确定性要求（关键）：**
+
 - 禁止在 `onSessionMessage` 中使用 `System.currentTimeMillis()` — 使用 Cluster 提供的 `cluster.time()`
 - 禁止使用 `Random` — 使用确定性伪随机数
 - 禁止多线程并发修改状态 — 所有状态变更在单一调度线程
@@ -777,6 +778,7 @@ Journal Event 格式（二进制追加写）：
 ```
 
 事件类型包括：
+
 - `ORDER_NEW`：新订单入簿
 - `ORDER_CANCEL`：订单撤销
 - `TRADE`：成交事件
@@ -934,13 +936,13 @@ Matching Engine 内存结构：
 
 ### 12.1 CPU 级优化
 
-| 优化点 | 具体措施 | 预期收益 |
-|--------|---------|---------|
-| CPU 亲和性 | 撮合线程绑定独立物理核（避免共享 L1/L2 cache） | 减少 cache miss |
-| NUMA 感知 | 内存分配在本地 NUMA 节点 | 减少内存访问延迟 |
-| 大页内存 | JVM 使用 `-XX:+UseLargePages`（2MB 大页） | 减少 TLB miss |
-| 忙轮询 | 热路径线程使用 `BusySpinIdleStrategy` | 避免线程调度延迟 |
-| 线程隔离 | 使用 `isolcpus` 内核参数隔离 CPU 核心 | 消除 OS 调度干扰 |
+| 优化点     | 具体措施                                | 预期收益          |
+|---------|-------------------------------------|---------------|
+| CPU 亲和性 | 撮合线程绑定独立物理核（避免共享 L1/L2 cache）       | 减少 cache miss |
+| NUMA 感知 | 内存分配在本地 NUMA 节点                     | 减少内存访问延迟      |
+| 大页内存    | JVM 使用 `-XX:+UseLargePages`（2MB 大页） | 减少 TLB miss   |
+| 忙轮询     | 热路径线程使用 `BusySpinIdleStrategy`      | 避免线程调度延迟      |
+| 线程隔离    | 使用 `isolcpus` 内核参数隔离 CPU 核心         | 消除 OS 调度干扰    |
 
 ### 12.2 JVM 级优化
 
@@ -1327,63 +1329,64 @@ Node-0(Leader)   Node-1(Follower)   Node-2(Follower)   Gateway
 ## 附录：关键依赖版本
 
 ```xml
+
 <properties>
-  <aeron.version>1.44.1</aeron.version>
-  <disruptor.version>4.0.0</disruptor.version>
-  <agrona.version>1.21.2</agrona.version>
-  <sbe.version>1.30.0</sbe.version>
-  <netty.version>4.1.108.Final</netty.version>
-  <affinity.version>3.23.3</affinity.version>
-  <hdrhistogram.version>2.2.2</hdrhistogram.version>
-  <java.version>21</java.version>
+    <aeron.version>1.44.1</aeron.version>
+    <disruptor.version>4.0.0</disruptor.version>
+    <agrona.version>1.21.2</agrona.version>
+    <sbe.version>1.30.0</sbe.version>
+    <netty.version>4.1.108.Final</netty.version>
+    <affinity.version>3.23.3</affinity.version>
+    <hdrhistogram.version>2.2.2</hdrhistogram.version>
+    <java.version>21</java.version>
 </properties>
 
-<!-- Aeron (含 Cluster) -->
+        <!-- Aeron (含 Cluster) -->
 <dependency>
-  <groupId>io.aeron</groupId>
-  <artifactId>aeron-all</artifactId>
-  <version>${aeron.version}</version>
+<groupId>io.aeron</groupId>
+<artifactId>aeron-all</artifactId>
+<version>${aeron.version}</version>
 </dependency>
 
-<!-- LMAX Disruptor -->
+        <!-- LMAX Disruptor -->
 <dependency>
-  <groupId>com.lmax</groupId>
-  <artifactId>disruptor</artifactId>
-  <version>${disruptor.version}</version>
+<groupId>com.lmax</groupId>
+<artifactId>disruptor</artifactId>
+<version>${disruptor.version}</version>
 </dependency>
 
-<!-- Agrona 无锁数据结构 -->
+        <!-- Agrona 无锁数据结构 -->
 <dependency>
-  <groupId>org.agrona</groupId>
-  <artifactId>agrona</artifactId>
-  <version>${agrona.version}</version>
+<groupId>org.agrona</groupId>
+<artifactId>agrona</artifactId>
+<version>${agrona.version}</version>
 </dependency>
 
-<!-- SBE 编解码 -->
+        <!-- SBE 编解码 -->
 <dependency>
-  <groupId>uk.co.real-logic</groupId>
-  <artifactId>sbe-all</artifactId>
-  <version>${sbe.version}</version>
+<groupId>uk.co.real-logic</groupId>
+<artifactId>sbe-all</artifactId>
+<version>${sbe.version}</version>
 </dependency>
 
-<!-- Netty -->
+        <!-- Netty -->
 <dependency>
-  <groupId>io.netty</groupId>
-  <artifactId>netty-all</artifactId>
-  <version>${netty.version}</version>
+<groupId>io.netty</groupId>
+<artifactId>netty-all</artifactId>
+<version>${netty.version}</version>
 </dependency>
 
-<!-- CPU 亲和性绑定 -->
+        <!-- CPU 亲和性绑定 -->
 <dependency>
-  <groupId>net.openhft</groupId>
-  <artifactId>Java-Thread-Affinity</artifactId>
-  <version>${affinity.version}</version>
+<groupId>net.openhft</groupId>
+<artifactId>Java-Thread-Affinity</artifactId>
+<version>${affinity.version}</version>
 </dependency>
 
-<!-- 延迟直方图 -->
+        <!-- 延迟直方图 -->
 <dependency>
-  <groupId>org.hdrhistogram</groupId>
-  <artifactId>HdrHistogram</artifactId>
-  <version>${hdrhistogram.version}</version>
+<groupId>org.hdrhistogram</groupId>
+<artifactId>HdrHistogram</artifactId>
+<version>${hdrhistogram.version}</version>
 </dependency>
 ```

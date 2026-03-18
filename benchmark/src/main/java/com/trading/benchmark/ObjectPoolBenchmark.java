@@ -24,15 +24,6 @@ import java.util.concurrent.TimeUnit;
 @Measurement(iterations = 5, time = 1)
 @Fork(1)
 public class ObjectPoolBenchmark {
-    static class TestObject {
-        long field1, field2, field3, field4;
-
-        void reset(long a, long b) {
-            this.field1 = a;
-            this.field2 = b;
-        }
-    }
-
     private ObjectPool<TestObject> pool;
 
     @Setup
@@ -54,5 +45,14 @@ public class ObjectPoolBenchmark {
         final TestObject obj = new TestObject();  // 触发 GC 压力
         obj.reset(System.nanoTime(), 42L);
         return obj.field1 + obj.field2;
+    }
+
+    static class TestObject {
+        long field1, field2, field3, field4;
+
+        void reset(long a, long b) {
+            this.field1 = a;
+            this.field2 = b;
+        }
     }
 }
