@@ -606,15 +606,15 @@ public final class InboundOrderSubscriber implements Runnable {
 
     private static final int FRAGMENT_LIMIT = 10;
 
-    private final Subscription          inboundSubscription;
+    private final Subscription inboundSubscription;
     private final RingBuffer<MatchingEvent> ringBuffer;
-    private final OrderBook             orderBook;
-    private final IdleStrategy          idleStrategy;
+    private final OrderBook orderBook;
+    private final IdleStrategy idleStrategy;
 
     // SBE 解码器（预分配，复用）
-    private final MessageHeaderDecoder      headerDecoder    = new MessageHeaderDecoder();
-    private final InternalNewOrderDecoder   newOrderDecoder  = new InternalNewOrderDecoder();
-    private final InternalCancelOrderDecoder cancelDecoder   = new InternalCancelOrderDecoder();
+    private final MessageHeaderDecoder headerDecoder = new MessageHeaderDecoder();
+    private final InternalNewOrderDecoder newOrderDecoder = new InternalNewOrderDecoder();
+    private final InternalCancelOrderDecoder cancelDecoder = new InternalCancelOrderDecoder();
 
     private volatile boolean running = true;
 
@@ -622,9 +622,9 @@ public final class InboundOrderSubscriber implements Runnable {
                                   final RingBuffer<MatchingEvent> ringBuffer,
                                   final OrderBook orderBook) {
         this.inboundSubscription = inboundSubscription;
-        this.ringBuffer          = ringBuffer;
-        this.orderBook           = orderBook;
-        this.idleStrategy        = new BusySpinIdleStrategy();
+        this.ringBuffer = ringBuffer;
+        this.orderBook = orderBook;
+        this.idleStrategy = new BusySpinIdleStrategy();
     }
 
     @Override
@@ -647,7 +647,7 @@ public final class InboundOrderSubscriber implements Runnable {
         // 读取消息头，判断类型
         headerDecoder.wrap(buffer, offset);
         final int templateId = headerDecoder.templateId();
-        final int headerLen  = MessageHeaderDecoder.ENCODED_LENGTH;
+        final int headerLen = MessageHeaderDecoder.ENCODED_LENGTH;
 
         if (templateId == InternalNewOrderDecoder.TEMPLATE_ID) {
             handleNewOrder(buffer, offset + headerLen);
@@ -660,50 +660,50 @@ public final class InboundOrderSubscriber implements Runnable {
 
     private void handleNewOrder(final DirectBuffer buffer, final int bodyOffset) {
         newOrderDecoder.wrap(buffer, bodyOffset,
-                             InternalNewOrderDecoder.BLOCK_LENGTH,
-                             InternalNewOrderDecoder.SCHEMA_VERSION);
+                InternalNewOrderDecoder.BLOCK_LENGTH,
+                InternalNewOrderDecoder.SCHEMA_VERSION);
 
         // 从对象池借出 OrderNode
         final OrderNode node = orderBook.borrowNode();
         if (node == null) {
             log.error("OrderNodePool exhausted! Dropping order orderId={}",
-                      newOrderDecoder.orderId());
+                    newOrderDecoder.orderId());
             return;
         }
 
         node.init(
-            newOrderDecoder.orderId(),
-            newOrderDecoder.accountId(),
-            orderBook.symbolId,
-            newOrderDecoder.side().value(),
-            newOrderDecoder.orderType().value(),
-            newOrderDecoder.timeInForce().value(),
-            newOrderDecoder.price(),
-            newOrderDecoder.quantity(),
-            0L,   // expireTimeNs（GTD 扩展时填入）
-            newOrderDecoder.timestamp()
+                newOrderDecoder.orderId(),
+                newOrderDecoder.accountId(),
+                orderBook.symbolId,
+                newOrderDecoder.side().value(),
+                newOrderDecoder.orderType().value(),
+                newOrderDecoder.timeInForce().value(),
+                newOrderDecoder.price(),
+                newOrderDecoder.quantity(),
+                0L,   // expireTimeNs（GTD 扩展时填入）
+                newOrderDecoder.timestamp()
         );
 
         // 发布到 RingBuffer
         ringBuffer.publishEvent((event, seq) -> {
             event.reset();
-            event.eventType    = 1;
-            event.orderNode    = node;
+            event.eventType = 1;
+            event.orderNode = node;
             event.correlationId = newOrderDecoder.correlationId();
         });
     }
 
     private void handleCancelOrder(final DirectBuffer buffer, final int bodyOffset) {
         cancelDecoder.wrap(buffer, bodyOffset,
-                           InternalCancelOrderDecoder.BLOCK_LENGTH,
-                           InternalCancelOrderDecoder.SCHEMA_VERSION);
+                InternalCancelOrderDecoder.BLOCK_LENGTH,
+                InternalCancelOrderDecoder.SCHEMA_VERSION);
 
-        final long orderId       = cancelDecoder.orderId();
+        final long orderId = cancelDecoder.orderId();
         final long correlationId = cancelDecoder.correlationId();
 
         ringBuffer.publishEvent((event, seq) -> {
             event.reset();
-            event.eventType     = 2;
+            event.eventType = 2;
             event.cancelOrderId = orderId;
             event.correlationId = correlationId;
         });
@@ -768,10 +768,10 @@ public final class MatchingDisruptor {
                              final Publication marketDataPublication) {
 
         // 1. 创建 Handler 实例
-        final SequenceAssignHandler   stage1  = new SequenceAssignHandler();
-        final MatchingHandler         stage2  = new MatchingHandler(matcher);
-        final JournalPublishHandler   stage3a = new JournalPublishHandler(journalPublication);
-        final ExecutionReportHandler  stage3b = new ExecutionReportHandler(execReportPublication);
+        final SequenceAssignHandler stage1 = new SequenceAssignHandler();
+        final MatchingHandler stage2 = new MatchingHandler(matcher);
+        final JournalPublishHandler stage3a = new JournalPublishHandler(journalPublication);
+        final ExecutionReportHandler stage3b = new ExecutionReportHandler(execReportPublication);
         final MarketDataPublishHandler stage3c = new MarketDataPublishHandler(marketDataPublication);
 
         // 2. 创建 Disruptor
@@ -782,29 +782,29 @@ public final class MatchingDisruptor {
         };
 
         this.disruptor = new Disruptor<>(
-            MatchingEvent.FACTORY,
-            RING_BUFFER_SIZE,
-            threadFactory,
-            ProducerType.SINGLE,          // 单生产者（InboundSubscriber 是唯一写入方）
-            new BusySpinWaitStrategy()    // 最低延迟
+                MatchingEvent.FACTORY,
+                RING_BUFFER_SIZE,
+                threadFactory,
+                ProducerType.SINGLE,          // 单生产者（InboundSubscriber 是唯一写入方）
+                new BusySpinWaitStrategy()    // 最低延迟
         );
 
         // 3. 配置 Pipeline 拓扑
         disruptor
-            .handleEventsWith(stage1)              // Stage 1 先执行
-            .then(stage2)                          // Stage 2 在 Stage 1 之后
-            .then(stage3a, stage3b, stage3c);      // Stage 3 并行
+                .handleEventsWith(stage1)              // Stage 1 先执行
+                .then(stage2)                          // Stage 2 在 Stage 1 之后
+                .then(stage3a, stage3b, stage3c);      // Stage 3 并行
 
         // 4. 启动 Disruptor
         this.ringBuffer = disruptor.start();
         log.info("MatchingDisruptor started for symbolId={}, ringBufferSize={}",
-                 orderBook.symbolId, RING_BUFFER_SIZE);
+                orderBook.symbolId, RING_BUFFER_SIZE);
 
         // 5. 创建 InboundSubscriber（从 Aeron 读入并写入 RingBuffer）
         this.inboundSubscriber = new InboundOrderSubscriber(
-            inboundSubscription, ringBuffer, orderBook);
+                inboundSubscription, ringBuffer, orderBook);
         this.inboundThread = new Thread(inboundSubscriber,
-            "inbound-subscriber-" + orderBook.symbolId);
+                "inbound-subscriber-" + orderBook.symbolId);
         this.inboundThread.setDaemon(false);
         this.inboundThread.start();
 
