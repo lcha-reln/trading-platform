@@ -61,9 +61,9 @@ public class OrderNodePool {
     public void release(final OrderNode node) {
         if (top < pool.length) {
             pool[top++] = node;
+        } else {
+            log.error("超出容量说明有重复归还 BUG，静默丢弃并可在此处加监控");
         }
-
-        log.error("超出容量说明有重复归还 BUG，静默丢弃并可在此处加监控");
     }
 
     /**
